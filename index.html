@@ -1525,6 +1525,87 @@
       renderMemoriesAndLetter();
     });
 
+    // Character Counter Real-time Update
+    wishMessageTextarea.addEventListener('input', () => {
+      const len = wishMessageTextarea.value.length;
+      charCount.textContent = `${len} / 300`;
+    });
+
+    // Memicu letusan confetti
+    function triggerConfettiEffect() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#FBBF24', '#C4B5FD', '#312E81', '#5B21B6']
+        });
+      }
+    }
+
+    // HANDLE SPELL CAST FORM SUBMISSION (FIXED PAGE RELOAD BUG)
+    wishForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Menghentikan reload halaman bawaan browser
+      
+      const name = senderNameInput.value.trim();
+      const message = wishMessageTextarea.value.trim();
+      
+      if (!name || !message) {
+        showToast("Mohon tuliskan nama dan doa indahmu.", "error");
+        return;
+      }
+
+      // Menonaktifkan tombol submit selama pengiriman berlangsung
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "TRANSMITTING TO STARS...";
+
+      const newWish = {
+        name: name,
+        message: message,
+        timestamp: Date.now()
+      };
+
+      if (localBackupMode) {
+        // Mode fallback jika Firebase tidak aktif
+        newWish.id = crypto.randomUUID();
+        localWishes.push(newWish);
+        localStorage.setItem('adit_wishbook_local_data', JSON.stringify(localWishes));
+        
+        // Reset Form
+        wishForm.reset();
+        charCount.textContent = "0 / 300";
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "TRANSMIT SPELL";
+
+        // Tampilkan letusan efek Confetti, modal selebrasi kustom, & toast sukses
+        triggerConfettiEffect();
+        openCelebrationModal();
+        renderWishesLocally();
+        showToast("Star Spell Cast Locally! ✦");
+      } else {
+        try {
+          // Aturan 1: Simpan di path `/artifacts/{appId}/public/data/wishes`
+          await addDoc(wishesColRef, newWish);
+          
+          // Reset Form
+          wishForm.reset();
+          charCount.textContent = "0 / 300";
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "TRANSMIT SPELL";
+
+          // Tampilkan letusan efek Confetti, modal selebrasi kustom, & toast sukses
+          triggerConfettiEffect();
+          openCelebrationModal();
+          showToast("Star Spell Transmitted Successfully! ✦");
+        } catch (err) {
+          console.error("Gagal mengirim doa ke bintang:", err);
+          showToast("Cosmic gateway connection failed.", "error");
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "TRANSMIT SPELL";
+        }
+      }
+    });
+
     // Reveal Constellation Memories action
     revealMemoriesBtn.addEventListener('click', () => {
       const targetDate = new Date("July 19, 2026 00:00:00").getTime();
