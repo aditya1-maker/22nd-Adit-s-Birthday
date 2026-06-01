@@ -449,7 +449,6 @@
               <div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 rounded-full animate-ping"></div>
             </div>
             <h3 class="font-magic-title text-lg font-bold text-amber-300 tracking-wider">Something magical awaits beyond this seal.</h3>
-            <!-- Corrected font below to inherit elegant 'EB Garamond' as requested -->
             <p class="text-sm text-purple-200/90 italic max-w-sm leading-relaxed">
               "The gateway is resting under the celestial veil. The spell portal can only be opened by the Keeper of Key."
             </p>
@@ -939,6 +938,7 @@
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    // Global variables
     let currentUser = null;
     let wishesColRef = null;
     let settingsDocRef = null;
@@ -948,6 +948,9 @@
     let db = null;
     let adminForceUnlocked = JSON.parse(localStorage.getItem('adit_wishbook_force_unlocked')) || false;
     let countdownExpired = false;
+
+    // GLOBAL UNIFIED APP ID TO PREVENT DELETION PATH MISMATCH
+    let currentAppId = "adits-22nd-wishbook";
 
     // Elements
     const wishForm = document.getElementById('wishForm');
@@ -1425,7 +1428,6 @@
     // Domestic User Variable Configuration (Hibrida / Auto Fallback)
     const setupFirebaseAndInit = async () => {
       try {
-        // Kredensial Firebase Produksi milik User
         const productionFirebaseConfig = {
           apiKey: "AIzaSyANGuUEOWvgkjrf91qvuE0YknjsgK173hs",
           authDomain: "adits22ndwishbook.firebaseapp.com",
@@ -1437,13 +1439,11 @@
           measurementId: "G-BG9LV5EH4M"
         };
 
-        // Jika berada di sandbox editor (memiliki config lingkungan), gunakan config lingkungan.
-        // Jika dideploy mandiri (di Vercel / Netlify), gunakan konfigurasi produksi milik user di atas secara otomatis.
         const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config) 
           ? JSON.parse(__firebase_config) 
           : productionFirebaseConfig;
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'adits-22nd-wishbook';
+        currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'adits-22nd-wishbook';
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -1460,8 +1460,8 @@
           currentUser = user;
           if (user) {
             // Path matches Rule 1 strictly
-            wishesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'wishes');
-            settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'settings');
+            wishesColRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'wishes');
+            settingsDocRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'config', 'settings');
             listenToWishesRealtime();
             listenToSettingsRealtime();
           }
@@ -1950,11 +1950,26 @@
 
     cancelAdminBtn.addEventListener('click', closeAdminLoginModal);
 
-    loginAdminBtn.addEventListener('click', () => {
+    loginAdminBtn.addEventListener('click', async () => {
       const user = adminUser.value.trim();
       const pass = adminPass.value.trim();
 
-      if (user === 'user22' && pass === 'admin_22') {
+      // SHA-256 hash check — password tidak disimpan plaintext di source code
+      const ADMIN_USER = 'user22';
+      const ADMIN_PASS_HASH = 'd0ac7c1e4522979685e3157e11fef63f6f382d7a1509761c5111dbd976297688';
+
+      async function hashString(str) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      const passHash = await hashString(pass);
+      const isValid = user === ADMIN_USER && passHash === ADMIN_PASS_HASH;
+
+      if (isValid) {
         isAdminActive = true;
         closeAdminLoginModal();
         showToast("Admin Mode Activated - Gateway Unlocked!");
@@ -2009,7 +2024,8 @@
           closeConfirmDeleteModal();
           renderWishesLocally();
         } else {
-          const wishDocRef = doc(db, 'artifacts', typeof __app_id !== 'undefined' ? __app_id : 'default-app-id', 'public', 'data', 'wishes', deleteTargetId);
+          // SECURE FIXED DELETION PATH
+          const wishDocRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'wishes', deleteTargetId);
           await deleteDoc(wishDocRef);
           showToast("Wish Erased Successfully");
           closeConfirmDeleteModal();
