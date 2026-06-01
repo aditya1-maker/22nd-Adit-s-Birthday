@@ -1989,11 +1989,25 @@
 
     cancelAdminBtn.addEventListener('click', closeAdminLoginModal);
 
-    loginAdminBtn.addEventListener('click', () => {
+    loginAdminBtn.addEventListener('click', async () => {
       const user = adminUser.value.trim();
       const pass = adminPass.value.trim();
 
-      if (user === 'user22' && pass === 'admin_22') {
+      const ADMIN_USER = 'user22';
+      const ADMIN_PASS_HASH = '05a2a7c612603622a073f29f39ed7c930bedae8177bd4cc1e4ae4e47ec4d6e55';
+
+      async function hashString(str) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      const passHash = await hashString(pass);
+      const isValid = user === ADMIN_USER && passHash === ADMIN_PASS_HASH;
+
+      if (isValid) {
         isAdminActive = true;
         closeAdminLoginModal();
         showToast("Admin Mode Activated - Gateway Unlocked!");
