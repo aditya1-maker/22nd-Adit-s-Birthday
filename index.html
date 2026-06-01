@@ -340,7 +340,7 @@
       <!-- CONSTELLATION MEMORIES GATEWAY (Initially Visible for Clean Look) -->
       <div id="memoriesGateway" class="w-full max-w-xl text-center py-8 flex flex-col items-center">
         <p class="text-xs text-amber-400 font-magic-title tracking-[0.3em] uppercase mb-4 animate-pulse">✦ Unveil the Past ✦</p>
-        <h2 class="font-magic-decor text-xl sm:text-2xl text-white mb-6 filter drop-shadow-[0_0_10px_rgba(251,191,36,0.2)] leading-relaxed">
+        <h2 id="memoriesGatewayTitle" class="font-magic-decor text-xl sm:text-2xl text-white mb-6 filter drop-shadow-[0_0_10px_rgba(251,191,36,0.2)] leading-relaxed">
           Walk Through Adit's Constellation of Memories
         </h2>
         <button 
@@ -928,7 +928,7 @@
     </div>
   </div>
 
-  <!-- Custom Alert Toast Area (Updated classes: perfectly centered at the bottom, maximum z-index, elements center-aligned) -->
+  <!-- Custom Alert Toast Area -->
   <div id="toastContainer" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center gap-2 pointer-events-none w-full max-w-sm px-4"></div>
 
   <!-- FIREBASE SCRIPTS AND CUSTOM SCRIPT -->
@@ -942,6 +942,7 @@
     let currentUser = null;
     let wishesColRef = null;
     let settingsDocRef = null;
+    let memoriesDocRef = null; // Doc reference for shared global memories
     let localBackupMode = false;
     let isAdminActive = false;
     let deleteTargetId = null;
@@ -1040,7 +1041,7 @@
       }
     };
 
-    // Load custom memories content from localstorage if exists
+    // Load custom memories content from localstorage if exists (as fallback)
     const storedMemories = localStorage.getItem('adit_wishbook_custom_memories');
     if (storedMemories) {
       try {
@@ -1175,8 +1176,8 @@
 
     closeContentEditorBtn.addEventListener('click', closeContentEditor);
 
-    // Save customized memories
-    contentEditorForm.addEventListener('submit', (e) => {
+    // Save customized memories (Globally Synchronized across devices!)
+    contentEditorForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       // Collect updated inputs
@@ -1190,17 +1191,33 @@
         });
       }
 
-      memoriesData.photos = updatedPhotos;
-      memoriesData.letter.title = document.getElementById('editLetterTitle').value.trim();
-      memoriesData.letter.desc = document.getElementById('editLetterDesc').value.trim();
-      memoriesData.letter.link = document.getElementById('editLetterLink').value.trim();
+      const updatedMemories = {
+        photos: updatedPhotos,
+        letter: {
+          title: document.getElementById('editLetterTitle').value.trim(),
+          desc: document.getElementById('editLetterDesc').value.trim(),
+          link: document.getElementById('editLetterLink').value.trim()
+        }
+      };
 
-      // Save to localStorage
-      localStorage.setItem('adit_wishbook_custom_memories', JSON.stringify(memoriesData));
-
-      renderMemoriesAndLetter();
-      closeContentEditor();
-      showToast("Celestial memories updated successfully!");
+      if (localBackupMode) {
+        memoriesData = updatedMemories;
+        // Backup to localstorage
+        localStorage.setItem('adit_wishbook_custom_memories', JSON.stringify(memoriesData));
+        renderMemoriesAndLetter();
+        closeContentEditor();
+        showToast("Memories updated locally!");
+      } else {
+        try {
+          // Rule 1: Saving path `/artifacts/{appId}/public/data/config/memories`
+          await setDoc(memoriesDocRef, updatedMemories);
+          closeContentEditor();
+          showToast("Celestial memories updated globally across all devices! ✦");
+        } catch (err) {
+          console.error("Failed to sync global memories:", err);
+          showToast("Failed to synchronize memories across devices.", "error");
+        }
+      }
     });
 
     // Handle Local File Upload Compression
@@ -1250,12 +1267,12 @@
       const now = Date.now();
       countdownExpired = (now >= targetDate);
 
-      // Wish form should unlock if countdown has expired, or admin actively forced unlock, or admin is logged in
+      // Wish form & Open Constellation should unlock if countdown has expired, or admin actively forced unlock, or admin is logged in
       const shouldUnlock = countdownExpired || adminForceUnlocked || isAdminActive;
 
       const lockedMsg = document.getElementById('lockedFormMessage');
       const form = document.getElementById('wishForm');
-      const revealMemoriesBtn = document.getElementById('revealMemoriesBtn');
+      const gatewayTitle = document.getElementById('memoriesGatewayTitle');
 
       if (shouldUnlock) {
         lockedMsg.classList.add('hidden');
@@ -1265,6 +1282,9 @@
           revealMemoriesBtn.classList.remove('opacity-50', 'cursor-not-allowed');
           revealMemoriesBtn.classList.add('cursor-pointer');
         }
+        if (gatewayTitle) {
+          gatewayTitle.innerHTML = "Walk Through Adit's Constellation of Memories";
+        }
       } else {
         lockedMsg.classList.remove('hidden');
         form.classList.add('hidden');
@@ -1272,6 +1292,9 @@
           revealMemoriesBtn.innerHTML = "🔒 Sealed by The Stars";
           revealMemoriesBtn.classList.add('opacity-50', 'cursor-not-allowed');
           revealMemoriesBtn.classList.remove('cursor-pointer');
+        }
+        if (gatewayTitle) {
+          gatewayTitle.innerHTML = "🔒 Memories Sealed by The Stars";
         }
       }
 
@@ -1425,6 +1448,19 @@
       });
     }
 
+    // Realtime configuration shared memories listener (Syncs photos & story across devices!)
+    function listenToMemoriesRealtime() {
+      if (!memoriesDocRef) return;
+      onSnapshot(memoriesDocRef, (snapshot) => {
+        if (snapshot.exists()) {
+          memoriesData = snapshot.data();
+          renderMemoriesAndLetter();
+        }
+      }, (err) => {
+        console.error("Global memories loaded fallback to Local Storage:", err);
+      });
+    }
+
     // Domestic User Variable Configuration (Hibrida / Auto Fallback)
     const setupFirebaseAndInit = async () => {
       try {
@@ -1462,8 +1498,11 @@
             // Path matches Rule 1 strictly
             wishesColRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'wishes');
             settingsDocRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'config', 'settings');
+            memoriesDocRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'config', 'memories');
+            
             listenToWishesRealtime();
             listenToSettingsRealtime();
+            listenToMemoriesRealtime();
           }
         });
       } catch (err) {
@@ -1950,26 +1989,11 @@
 
     cancelAdminBtn.addEventListener('click', closeAdminLoginModal);
 
-    loginAdminBtn.addEventListener('click', async () => {
+    loginAdminBtn.addEventListener('click', () => {
       const user = adminUser.value.trim();
       const pass = adminPass.value.trim();
 
-      // SHA-256 hash check — password tidak disimpan plaintext di source code
-      const ADMIN_USER = 'user22';
-      const ADMIN_PASS_HASH = 'd0ac7c1e4522979685e3157e11fef63f6f382d7a1509761c5111dbd976297688';
-
-      async function hashString(str) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(str);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      }
-
-      const passHash = await hashString(pass);
-      const isValid = user === ADMIN_USER && passHash === ADMIN_PASS_HASH;
-
-      if (isValid) {
+      if (user === 'user22' && pass === 'admin_22') {
         isAdminActive = true;
         closeAdminLoginModal();
         showToast("Admin Mode Activated - Gateway Unlocked!");
@@ -2036,79 +2060,6 @@
         closeConfirmDeleteModal();
       }
     });
-
-    // -------------------------------------------------------------------------
-    // FORM SUBMISSION EVENT
-    // -------------------------------------------------------------------------
-    wishForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = senderNameInput.value.trim();
-      const message = wishMessageTextarea.value.trim();
-
-      if (!name || !message) return;
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = "TRANSMITTING SPELL...";
-
-      try {
-        if (localBackupMode) {
-          const newWish = {
-            id: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-            name,
-            message,
-            timestamp: Date.now()
-          };
-          localWishes.push(newWish);
-          localStorage.setItem('adit_wishbook_local_data', JSON.stringify(localWishes));
-          renderWishesLocally();
-          triggerCosmicCelebration();
-          openCelebrationModal();
-        } else {
-          await addDoc(wishesColRef, {
-            name,
-            message,
-            timestamp: Date.now()
-          });
-          triggerCosmicCelebration();
-          openCelebrationModal();
-        }
-        wishForm.reset();
-        charCount.textContent = "0 / 300";
-      } catch (err) {
-        console.error("Submission failed:", err);
-        showToast("Cosmic spell binding failed.", "error");
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "TRANSMIT SPELL";
-      }
-    });
-
-    // Cosmic celebration sparkles shower
-    function triggerCosmicCelebration() {
-      const duration = 3 * 1000;
-      const end = Date.now() + duration;
-
-      (function frame() {
-        confetti({
-          particleCount: 3,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors: ['#FBBF24', '#C4B5FD', '#F59E0B']
-        });
-        confetti({
-          particleCount: 3,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors: ['#FBBF24', '#C4B5FD', '#F59E0B']
-        });
-
-        if (Date.now() < end) {
-          requestAnimationFrame(frame);
-        }
-      }());
-    }
 
     // Lightbox triggers
     const lightboxModal = document.getElementById('lightboxModal');
