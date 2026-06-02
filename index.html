@@ -285,6 +285,9 @@
       </svg>
     </button>
     <!-- Music Toggle -->
+    <audio id="bgMusic" loop preload="auto">
+  <source src="https://res.cloudinary.com/dzskmlmuu/video/upload/v1780380026/Nadin_Amizah_-_Semua_Aku_Dirayakan_Official_Lyric_Video_ecjkrw.mp4" type="audio/mpeg">
+</audio>
     <button id="musicToggleBtn" class="flex items-center gap-2.5 px-5 py-2.5 bg-slate-950/80 border border-purple-500/40 rounded-full text-xs font-semibold text-amber-400 shadow-[0_4px_20px_rgba(139,92,246,0.2)] hover:shadow-[0_4px_25px_rgba(245,158,11,0.4)] hover:border-amber-400/65 active:scale-95 transition-all cursor-pointer backdrop-blur-md font-magic-title tracking-widest">
       <span id="musicPing" class="relative flex h-2 w-2">
         <span class="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 animate-ping"></span>
@@ -1632,163 +1635,7 @@
     });
 
     // -------------------------------------------------------------------------
-    // CELESTIAL MUSIC BOX SYNTHESIZER: HAPPY BIRTHDAY FULL SONG
-    // -------------------------------------------------------------------------
-    class CelestialMusicBox {
-      constructor() {
-        this.ctx = null;
-        this.isPlaying = false;
-        this.tempo = 94; // Tempo yang ceria namun tetap tenang dan bernapas kosmik
-        this.currentIndex = 0;
-        this.nextNoteTime = 0.0;
-        this.schedulerTimerId = null;
-        
-        // Melodi Lengkap "Happy Birthday to You" dalam Aransemen Music Box
-        this.melody = [
-          // Happy Birthday to you
-          { note: "C5", length: 0.5 }, { note: "C5", length: 0.5 },
-          { note: "D5", length: 1.0 }, { note: "C5", length: 1.0 },
-          { note: "F5", length: 1.0 }, { note: "E5", length: 2.0 },
-          
-          // Happy Birthday to you
-          { note: "C5", length: 0.5 }, { note: "C5", length: 0.5 },
-          { note: "D5", length: 1.0 }, { note: "C5", length: 1.0 },
-          { note: "G5", length: 1.0 }, { note: "F5", length: 2.0 },
-          
-          // Happy Birthday dear Adit
-          { note: "C5", length: 0.5 }, { note: "C5", length: 0.5 },
-          { note: "C6", length: 1.0 }, { note: "A5", length: 1.0 },
-          { note: "F5", length: 1.0 }, { note: "E5", length: 1.0 }, { note: "D5", length: 2.0 },
-          
-          // Happy Birthday to you
-          { note: "Bb5", length: 0.5 }, { note: "Bb5", length: 0.5 },
-          { note: "A5", length: 1.0 }, { note: "F5", length: 1.0 },
-          { note: "G5", length: 1.0 }, { note: "F5", length: 2.0 },
-          
-          // Istirahat udara kosmik sejenak sebelum loop berputar kembali
-          { note: "REST", length: 2.0 }
-        ];
-
-        this.frequencies = {
-          "C5": 523.25, "D5": 587.33, "E5": 659.25, "F5": 698.46, "G5": 783.99,
-          "A5": 880.00, "Bb5": 932.33, "C6": 1046.50, "REST": 0
-        };
-      }
-
-      initContext() {
-        if (!this.ctx) {
-          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-      }
-
-      playTwinkle(frequency, time, duration) {
-        if (!this.ctx || frequency === 0) return;
-
-        // Tiga lapis osilator untuk meniru getaran bel murni Celesta & Music Box logam yang magis
-        const oscMain = this.ctx.createOscillator();
-        const oscSub = this.ctx.createOscillator();
-        const oscSparkle = this.ctx.createOscillator();
-        
-        oscMain.type = "sine"; // Gelombang sinus murni sebagai dasar lonceng
-        oscMain.frequency.setValueAtTime(frequency, time);
-
-        oscSub.type = "triangle"; // Memberikan tekstur kayu/logam ringan
-        oscSub.frequency.setValueAtTime(frequency * 2.0, time); // Harmoni 1-oktaf di atasnya
-
-        oscSparkle.type = "sine"; // Percikan magis Celesta
-        oscSparkle.frequency.setValueAtTime(frequency * 3.0, time); // Harmoni ke-3 yang lembut
-
-        // Pengatur Volume Mandiri (Envelopes)
-        const gainMain = this.ctx.createGain();
-        const gainSub = this.ctx.createGain();
-        const gainSparkle = this.ctx.createGain();
-
-        // Music Box Timbre: Attack instan dan sangat tajam, disusul decay eksponensial yang panjang
-        gainMain.gain.setValueAtTime(0.0, time);
-        gainMain.gain.linearRampToValueAtTime(0.16, time + 0.003); // Attack ultra cepat
-        gainMain.gain.exponentialRampToValueAtTime(0.001, time + duration * 2.6);
-
-        gainSub.gain.setValueAtTime(0.0, time);
-        gainSub.gain.linearRampToValueAtTime(0.03, time + 0.006);
-        gainSub.gain.exponentialRampToValueAtTime(0.001, time + duration * 1.5);
-
-        gainSparkle.gain.setValueAtTime(0.0, time);
-        gainSparkle.gain.linearRampToValueAtTime(0.012, time + 0.002);
-        gainSparkle.gain.exponentialRampToValueAtTime(0.001, time + duration * 1.2);
-
-        // Lowpass filter untuk memotong frekuensi tinggi yang menusuk, agar suara terdengar empuk & romantis
-        const lowpass = this.ctx.createBiquadFilter();
-        lowpass.type = "lowpass";
-        lowpass.frequency.setValueAtTime(11000, time);
-
-        // Efek Delay/Pantulan Ruang Angkasa
-        const delayNode = this.ctx.createDelay();
-        delayNode.delayTime.setValueAtTime(0.42, time); // Gema selaras tempo
-
-        const delayFeedback = this.ctx.createGain();
-        delayFeedback.gain.setValueAtTime(0.35, time); // Feedback volume gema
-
-        // Sambungan Jalur Audio
-        oscMain.connect(gainMain);
-        oscSub.connect(gainSub);
-        oscSparkle.connect(gainSparkle);
-
-        gainMain.connect(lowpass);
-        gainSub.connect(lowpass);
-        gainSparkle.connect(lowpass);
-
-        lowpass.connect(this.ctx.destination);
-
-        // Sambungan efek tunda (Delay)
-        lowpass.connect(delayNode);
-        delayNode.connect(delayFeedback);
-        delayFeedback.connect(delayNode);
-        delayFeedback.connect(this.ctx.destination);
-
-        // Memulai dan menghentikan getaran suara
-        oscMain.start(time);
-        oscSub.start(time);
-        oscSparkle.start(time);
-
-        oscMain.stop(time + duration * 3.2);
-        oscSub.stop(time + duration * 3.2);
-        oscSparkle.stop(time + duration * 3.2);
-      }
-
-      scheduler() {
-        while (this.nextNoteTime < this.ctx.currentTime + 0.1) {
-          const currentMelody = this.melody[this.currentIndex];
-          const freq = this.frequencies[currentMelody.note];
-          const beatDuration = 60.0 / this.tempo;
-          const noteDuration = currentMelody.length * beatDuration;
-
-          this.playTwinkle(freq, this.nextNoteTime, noteDuration);
-
-          this.nextNoteTime += noteDuration;
-          this.currentIndex = (this.currentIndex + 1) % this.melody.length;
-        }
-        
-        this.schedulerTimerId = setTimeout(() => this.scheduler(), 25);
-      }
-
-      start() {
-        this.initContext();
-        if (this.ctx.state === 'suspended') {
-          this.ctx.resume();
-        }
-        this.isPlaying = true;
-        this.nextNoteTime = this.ctx.currentTime;
-        this.scheduler();
-      }
-
-      stop() {
-        this.isPlaying = false;
-        clearTimeout(this.schedulerTimerId);
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // REALITY LOFI AMBIENT MUSIC SYNTHESIZER
+    
     // -------------------------------------------------------------------------
     class LofiMusicSynthesizer {
       constructor() {
@@ -1871,7 +1718,12 @@
       }
     }
 
-    const musicPlayer = new CelestialMusicBox();
+    const musicPlayer = document.getElementById('bgMusic');
+musicPlayer.start = () => musicPlayer.play();
+musicPlayer.stop = () => musicPlayer.pause();
+musicPlayer.isPlaying = false;
+musicPlayer.addEventListener('play', () => musicPlayer.isPlaying = true);
+musicPlayer.addEventListener('pause', () => musicPlayer.isPlaying = false);
     const lofiPlayer = new LofiMusicSynthesizer();
 
     // Trigger music load via Enter World
