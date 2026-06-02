@@ -30,34 +30,2307 @@
   <!-- Google Fonts: Cinzel Decorative, Cinzel, EB Garamond, & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --gold: #FBBF24;
+      --gold-glow: rgba(251, 191, 36, 0.3);
+    }
+    body {
+      font-family: 'EB Garamond', serif;
+      background-color: #0A0F1E;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .font-magic-title {
+      font-family: 'Cinzel', serif;
+    }
+    .font-magic-decor {
+      font-family: 'Cinzel Decorative', serif;
+    }
+    .font-sans-inter {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    /* Custom Luxury Cursor (Active only on mouse pointing devices) */
+    @media (pointer: fine) {
+      body { cursor: none; }
+      #cursor {
+        width: 12px; height: 12px; background: var(--gold); border-radius: 50%;
+        position: fixed; pointer-events: none; z-index: 9999;
+        transform: translate(-50%, -50%); transition: transform 0.08s ease;
+        box-shadow: 0 0 10px var(--gold), 0 0 25px var(--gold-glow);
+        opacity: 0;
+      }
+      #cursor-trail {
+        width: 30px; height: 30px; border: 1px solid rgba(196, 181, 253, 0.5);
+        border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998;
+        transform: translate(-50%, -50%); transition: all 0.12s ease;
+        opacity: 0;
+      }
+    }
+
+    /* Magical Glassmorphism cards styling */
+    .glass-magical {
+      background: rgba(10, 15, 30, 0.75);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(196, 181, 253, 0.2);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    
+    .glass-card-magical {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(196, 181, 253, 0.18);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .glass-card-magical:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(139, 92, 246, 0.25), 0 0 30px rgba(251, 191, 36, 0.2);
+      border-color: rgba(251, 191, 36, 0.5);
+    }
+
+    /* Floating Celestial Objects keyframes */
+    @keyframes floatCelestial {
+      0%, 100% { transform: translateY(0px) rotate(0deg); filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.3)); }
+      50% { transform: translateY(-20px) rotate(4deg); filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.6)); }
+    }
+    .celestial-float-1 { animation: floatCelestial 8s ease-in-out infinite; }
+    .celestial-float-2 { animation: floatCelestial 10s ease-in-out infinite; animation-delay: 2s; }
+
+    /* Custom Responsive Masonry Columns for Wish Cards */
+    .wishes-masonry {
+      columns: 1; column-gap: 1.5rem;
+    }
+    @media (min-width: 640px) { .wishes-masonry { columns: 2; } }
+    @media (min-width: 1024px) { .wishes-masonry { columns: 3; } }
+    .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; }
+
+    @keyframes cardReveal {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-card-reveal { animation: cardReveal 0.6s ease forwards; }
+
+    @keyframes slideIn {
+      from { transform: translateY(100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-in { animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+    /* Cloud Animation for Reality View */
+    @keyframes floatClouds {
+      0% { transform: translateX(-10%); }
+      50% { transform: translateX(10%); }
+      100% { transform: translateX(-10%); }
+    }
+    .cloud-float {
+      animation: floatClouds 30s ease-in-out infinite;
+    }
+
+    /* Floating firefly particles inside the modal */
+    @keyframes modalFireflies {
+      0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.2; }
+      50% { transform: translateY(-40px) translateX(20px); opacity: 0.9; }
+    }
+    .modal-firefly {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #FBBF24;
+      border-radius: 50%;
+      filter: blur(1px);
+      pointer-events: none;
+      animation: modalFireflies 6s infinite ease-in-out;
+    }
+  </style>
 </head>
-<body class="bg-magic-deep text-white selection:bg-magic-gold/30">
+<body class="relative text-slate-100 selection:bg-purple-800 selection:text-amber-200">
 
-  <!-- Tombol Exit World - Dipindahkan ke level root body, z-index tinggi -->
-  <div class="fixed top-6 left-6 z-[200]">
-    <button id="exitWorldBtn" class="px-4 py-2 bg-magic-indigo/80 backdrop-blur-md border border-magic-lavender/20 rounded-full text-sm font-semibold text-white hover:bg-magic-purple transition-all duration-300">
-      Exit World
-    </button>
+  <!-- INTRO SCREEN OVERLAY (Called by the Stars) -->
+  <div id="introScreen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#070A14] transition-all duration-1000">
+    <div class="absolute inset-0 pointer-events-none z-0">
+      <div class="absolute top-[20%] left-[20%] w-[40vw] h-[40vw] bg-purple-900/10 rounded-full blur-[120px]"></div>
+      <div class="absolute bottom-[20%] right-[20%] w-[40vw] h-[40vw] bg-indigo-900/15 rounded-full blur-[120px]"></div>
+    </div>
+    
+    <div class="relative z-10 text-center px-6 max-w-2xl flex flex-col items-center">
+      <span class="text-xs font-semibold tracking-[0.4em] uppercase text-amber-400 font-magic-title mb-4 animate-pulse">
+        Called by The Stars
+      </span>
+      <h1 class="font-magic-decor text-4xl sm:text-6xl font-bold tracking-wider text-white mb-8 filter drop-shadow-[0_0_15px_rgba(251,191,36,0.3)]">
+        Adit's 22nd<br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-purple-300 to-amber-400">Enchanted</span> Wishbook
+      </h1>
+      
+      <button 
+        id="enterWorldBtn"
+        class="group relative px-10 py-4 overflow-hidden rounded-full border border-amber-400/40 bg-transparent text-amber-300 font-semibold tracking-[0.25em] text-xs font-magic-title uppercase shadow-[0_0_20px_rgba(251,191,36,0.15)] hover:shadow-[0_0_35px_rgba(251,191,36,0.4)] active:scale-95 transition-all duration-300 cursor-pointer"
+      >
+        <span class="absolute inset-0 bg-gradient-to-r from-purple-900 to-indigo-900 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+        <span class="relative z-10">ENTER THE WORLD</span>
+      </button>
+    </div>
   </div>
 
-  <!-- Tombol Gear/Admin & Music - Dipindahkan ke level root body, z-index tinggi -->
-  <div class="fixed top-6 right-6 z-[200] flex items-center gap-3">
-    <button id="gearBtn" class="p-3 bg-magic-indigo/80 backdrop-blur-md border border-magic-lavender/20 rounded-full hover:bg-magic-purple transition-all duration-300">
-      <!-- Icon Gear (SVG) -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-magic-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    </button>
-    <button id="musicToggle" class="p-3 bg-magic-indigo/80 backdrop-blur-md border border-magic-lavender/20 rounded-full hover:bg-magic-purple transition-all duration-300">
-      <!-- Icon Music -->
-      <svg id="musicIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-magic-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-      </svg>
-    </button>
+  <!-- REALITY ESCAPE OVERLAY (Daytime transition) -->
+  <div id="realityOverlay" class="fixed inset-0 z-[120] flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-1000 bg-gradient-to-b from-sky-300 via-sky-100 to-amber-50" style="display: none;">
+    <!-- Glowing Sun -->
+    <div class="absolute top-[10%] right-[10%] w-32 h-32 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 filter blur-md shadow-[0_0_50px_rgba(251,191,36,0.6)] animate-pulse"></div>
+    
+    <!-- Floating Clouds -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0 cloud-float opacity-80">
+      <div class="absolute top-[20%] left-[-5%] w-64 h-20 bg-white/70 rounded-full filter blur-xl"></div>
+      <div class="absolute top-[45%] right-[-10%] w-96 h-28 bg-white/60 rounded-full filter blur-xl"></div>
+      <div class="absolute bottom-[30%] left-[15%] w-80 h-24 bg-white/70 rounded-full filter blur-xl"></div>
+    </div>
+
+    <!-- Reality Content Card -->
+    <div class="relative z-10 text-center px-6 max-w-xl flex flex-col items-center">
+      <div class="p-4 bg-white/40 border border-white/60 rounded-full shadow-lg mb-8">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-8 h-8 text-amber-500 animate-[spin_20s_linear_infinite]">
+          <circle cx="12" cy="12" r="5" />
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+        </svg>
+      </div>
+      <h2 class="font-magic-title text-2xl sm:text-3xl font-bold text-sky-950 tracking-widest uppercase mb-4">
+        Returned to Reality
+      </h2>
+      <p class="text-sky-900/80 text-base sm:text-lg italic leading-relaxed font-light font-sans-inter mb-10 max-w-md">
+        "The stars have faded into a bright new dawn. Thank you for stepping inside the dream world."
+      </p>
+      
+      <div class="font-magic-decor text-3xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-amber-800 mb-8 filter drop-shadow-sm">
+        With Love, Candra Aditya
+      </div>
+
+      <!-- Action to return back -->
+      <button 
+        id="returnStarsBtn"
+        class="px-8 py-3.5 bg-sky-900 hover:bg-sky-950 text-white font-medium text-xs font-magic-title tracking-widest uppercase rounded-full shadow-lg hover:shadow-sky-800/30 active:scale-95 transition-all cursor-pointer border border-sky-700/50"
+      >
+        RETURN TO THE STARS
+      </button>
+    </div>
   </div>
 
-  <!-- Konten lainnya tetap sama -->
+  <!-- CUSTOM CURSOR ELEMENTS -->
+  <div id="cursor" class="hidden md:block"></div>
+  <div id="cursor-trail" class="hidden md:block"></div>
+
+  <!-- DEEP SPACE BACKDROP CANVASES -->
+  <canvas id="starCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+  
+  <!-- Glowing Space Dust & Nebulas Overlay -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-purple-900/20 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-[10%] right-[-10%] w-[60vw] h-[60vw] bg-indigo-900/25 rounded-full blur-[160px]"></div>
+    <div class="absolute top-[40%] left-[30%] w-[40vw] h-[40vw] bg-amber-500/5 rounded-full blur-[120px]"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-[#0A0F1E] via-[#0F0A2E]/40 to-[#0A0F1E]"></div>
+  </div>
+
+  <!-- FLOATING DECORATIONS -->
+  <div class="absolute inset-0 pointer-events-none overflow-hidden z-10">
+    <!-- Crescent Moon Mirroring Left -->
+    <div class="absolute top-32 left-[4%] md:left-[8%] celestial-float-1 opacity-75">
+      <svg viewBox="0 0 100 100" class="w-16 h-16 filter drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]">
+        <path d="M50 10C27.9 10 10 27.9 10 50s17.9 40 40 40c7.8 0 15-2.2 21.2-6-15.6-3.8-27.2-17.9-27.2-34 0-16.1 11.6-30.2 27.2-34C65 12.2 57.8 10 50 10z" fill="#FBBF24"/>
+      </svg>
+    </div>
+    <!-- Sparkling diamond star -->
+    <div class="absolute top-48 right-[5%] md:right-[9%] celestial-float-2 opacity-85">
+      <svg viewBox="0 0 100 100" class="w-14 h-14 filter drop-shadow-[0_0_15px_rgba(251,191,36,0.7)]">
+        <circle cx="50" cy="50" r="25" fill="#FFFBEB" opacity="0.15"/>
+        <circle cx="50" cy="50" r="15" fill="#FEF3C7" opacity="0.25"/>
+        <line x1="50" y1="10" x2="50" y2="90" stroke="#FDE68A" stroke-width="1.5" opacity="0.5"/>
+        <line x1="10" y1="50" x2="90" y2="50" stroke="#FDE68A" stroke-width="1.5" opacity="0.5"/>
+        <line x1="22" y1="22" x2="78" y2="78" stroke="#FDE68A" stroke-width="1" opacity="0.3"/>
+        <line x1="22" y1="78" x2="78" y2="22" stroke="#FDE68A" stroke-width="1" opacity="0.3"/>
+        <path d="M50,25 L62,50 L50,75 L38,50 Z" fill="#F59E0B"/>
+        <path d="M50,32 L58,50 L50,68 L42,50 Z" fill="#FCD34D"/>
+      </svg>
+    </div>
+    <!-- Classic gold star -->
+    <div class="absolute top-[65%] left-[5%] celestial-float-1 opacity-65">
+      <svg viewBox="0 0 100 100" class="w-12 h-12 filter drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]">
+        <polygon points="50,5 64.3,34.1 96,38.7 73,61.1 78.4,92.7 50,77.8 21.6,92.7 27,61.1 4,38.7 35.7,34.1" fill="#FCD34D" stroke="#F59E0B" stroke-width="2"/>
+        <circle cx="50" cy="51" r="10" fill="#F59E0B" opacity="0.3"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- FLOATING CONTROLLERS BAR -->
+  <div class="w-full max-w-7xl mx-auto px-6 py-4 flex justify-between items-center pointer-events-none bg-slate-950/20 backdrop-blur-[2px] border-b border-white/5">
+    <!-- Exit (Close) Page button on left -->
+    <div class="pointer-events-auto">
+      <button id="exitWorldBtn" class="flex items-center gap-2 px-4 py-2.5 bg-slate-950/80 border border-rose-500/30 rounded-full text-[10px] font-bold text-rose-300 shadow-[0_4px_15px_rgba(239,68,68,0.1)] hover:shadow-[0_4px_25px_rgba(239,68,68,0.3)] hover:border-rose-400/50 active:scale-95 transition-all cursor-pointer backdrop-blur-md font-magic-title tracking-widest">
+        <span>EXIT WORLD</span>
+      </button>
+    </div>
+
+    <!-- Music toggle & Admin gear buttons on right -->
+    <div class="pointer-events-auto flex items-center gap-3">
+      <!-- Admin Gear Action -->
+      <button id="adminBtn" class="flex items-center justify-center w-10 h-10 bg-slate-950/80 border border-purple-500/30 rounded-full text-amber-400 shadow-[0_4px_20px_rgba(139,92,246,0.15)] hover:shadow-[0_4px_25px_rgba(245,158,11,0.3)] hover:border-amber-400/50 active:scale-95 transition-all cursor-pointer backdrop-blur-md">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <!-- Music Toggle -->
+      <button id="musicToggleBtn" class="flex items-center gap-2.5 px-5 py-2.5 bg-slate-950/80 border border-purple-500/40 rounded-full text-xs font-semibold text-amber-400 shadow-[0_4px_20px_rgba(139,92,246,0.2)] hover:shadow-[0_4px_25px_rgba(245,158,11,0.4)] hover:border-amber-400/65 active:scale-95 transition-all cursor-pointer backdrop-blur-md font-magic-title tracking-widest">
+        <span id="musicPing" class="relative flex h-2 w-2">
+          <span class="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 animate-ping"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+        </span>
+        <span id="musicText">PLAY</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN WRAPPER CONTENT -->
+  <div class="relative z-20 max-w-6xl mx-auto px-6 py-16 flex flex-col items-center">
+    
+    <!-- HEADER INTRO HERO SECTION -->
+    <header class="text-center mb-16 max-w-3xl flex flex-col items-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-950/50 border border-purple-500/30 shadow-[0_0_15px_rgba(139,92,246,0.2)] text-[11px] font-bold text-amber-300 uppercase tracking-[0.3em] mb-6 font-magic-title">
+        ✦ The 22nd Celestial Alignment ✦
+      </div>
+      
+      <h1 class="font-magic-decor text-4xl sm:text-6xl lg:text-7xl font-bold tracking-wide text-white mb-4 filter drop-shadow-[0_4px_15px_rgba(196,181,253,0.4)] leading-tight">
+        Adit's 22nd <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-purple-300 to-amber-400">Enchanted</span> Wishbook
+      </h1>
+
+      <!-- CELESTIAL COUNTDOWN CONTAINER (Targeting 19 July 2026) -->
+      <div id="countdownContainer" class="flex flex-wrap items-center justify-center gap-4 my-6 font-magic-title">
+        <div class="glass-magical px-5 py-3 rounded-2xl border border-purple-500/20 text-center min-w-[75px] shadow-[0_4px_20px_rgba(139,92,246,0.1)]">
+          <span id="days" class="text-2xl font-bold text-amber-300">00</span>
+          <p class="text-[9px] text-purple-300 uppercase tracking-widest mt-1">Days</p>
+        </div>
+        <div class="glass-magical px-5 py-3 rounded-2xl border border-purple-500/20 text-center min-w-[75px] shadow-[0_4px_20px_rgba(139,92,246,0.1)]">
+          <span id="hours" class="text-2xl font-bold text-amber-300">00</span>
+          <p class="text-[9px] text-purple-300 uppercase tracking-widest mt-1">Hours</p>
+        </div>
+        <div class="glass-magical px-5 py-3 rounded-2xl border border-purple-500/20 text-center min-w-[75px] shadow-[0_4px_20px_rgba(139,92,246,0.1)]">
+          <span id="minutes" class="text-2xl font-bold text-amber-300">00</span>
+          <p class="text-[9px] text-purple-300 uppercase tracking-widest mt-1">Mins</p>
+        </div>
+        <div class="glass-magical px-5 py-3 rounded-2xl border border-purple-500/20 text-center min-w-[75px] shadow-[0_4px_20px_rgba(139,92,246,0.1)]">
+          <span id="seconds" class="text-2xl font-bold text-amber-300">00</span>
+          <p class="text-[9px] text-purple-300 uppercase tracking-widest mt-1">Secs</p>
+        </div>
+      </div>
+      
+      <div class="w-32 h-[1px] bg-gradient-to-r from-transparent via-purple-400 to-transparent mx-auto my-6"></div>
+      
+      <p class="text-slate-100 text-lg sm:text-xl max-w-xl mx-auto italic font-medium tracking-wide leading-relaxed filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+        "Whisper your warm prayers into the celestial canvas and illuminate Adit's path into his golden age."
+      </p>
+    </header>
+
+    <!-- INTERACTIVE PHOTO MEMORIES, GAME FORM & LIST SECTION -->
+    <main class="w-full flex flex-col gap-12 items-center mb-16">
+      
+      <!-- CONSTELLATION MEMORIES GATEWAY (Initially Visible for Clean Look) -->
+      <div id="memoriesGateway" class="w-full max-w-xl text-center py-8 flex flex-col items-center">
+        <p class="text-xs text-amber-400 font-magic-title tracking-[0.3em] uppercase mb-4 animate-pulse">✦ Unveil the Past ✦</p>
+        <h2 id="memoriesGatewayTitle" class="font-magic-decor text-xl sm:text-2xl text-white mb-6 filter drop-shadow-[0_0_10px_rgba(251,191,36,0.2)] leading-relaxed">
+          Walk Through Adit's Constellation of Memories
+        </h2>
+        <button 
+          id="revealMemoriesBtn"
+          class="px-8 py-3.5 bg-gradient-to-r from-purple-950 to-indigo-950 border border-amber-400/35 hover:border-amber-400 text-amber-300 font-bold text-xs font-magic-title tracking-widest uppercase rounded-2xl shadow-[0_0_15px_rgba(139,92,246,0.15)] hover:shadow-[0_0_30px_rgba(251,191,36,0.35)] active:scale-95 transition-all duration-300 cursor-pointer"
+        >
+          ✦ Open Constellation ✦
+        </button>
+      </div>
+
+      <!-- NOSTALGIC CELESTIAL TABS SECTION (Hidden until Button is clicked) -->
+      <section id="nostalgiaTabsGallery" class="w-full max-w-5xl mt-4 mb-8 hidden">
+        <div class="text-center mb-10 flex flex-col items-center">
+          <!-- Sleek Tab Switcher -->
+          <div class="inline-flex p-1.5 bg-indigo-950/60 border border-purple-500/20 rounded-full shadow-[0_0_20px_rgba(139,92,246,0.15)] mb-6 z-10 relative">
+            <button id="tabPhotosBtn" class="px-6 py-2.5 rounded-full text-xs font-bold font-magic-title tracking-widest uppercase transition-all duration-300 cursor-pointer bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.4)]">
+              ✦ Childhood Memories
+            </button>
+            <button id="tabLetterBtn" class="px-6 py-2.5 rounded-full text-xs font-bold font-magic-title tracking-widest uppercase transition-all duration-300 cursor-pointer text-purple-200 hover:text-white ml-1">
+              ✦ Letter to Self
+            </button>
+            <button id="backToHomeBtn" class="px-6 py-2.5 rounded-full text-xs font-bold font-magic-title tracking-widest uppercase transition-all duration-300 cursor-pointer text-rose-300 hover:text-rose-100 ml-1">
+              ✦ Back
+            </button>
+          </div>
+
+          <!-- Admin Quick Edit Wrapper (Only visible when logged in as admin) -->
+          <div id="adminEditContentWrapper" class="hidden justify-center items-center flex-wrap gap-3 mb-6 animate-pulse">
+            <button id="openContentEditorBtn" class="flex items-center gap-2 px-5 py-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/40 rounded-full text-xs font-bold text-amber-300 tracking-wider font-magic-title cursor-pointer transition-all shadow-[0_0_15px_rgba(251,191,36,0.1)]">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z" />
+              </svg>
+              EDIT MEMORIES &amp; LETTER
+            </button>
+            <!-- NEW ADMIN FORCE UNLOCK BUTTON -->
+            <button id="toggleForceUnlockBtn" class="flex items-center gap-2 px-5 py-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/40 rounded-full text-xs font-bold text-amber-300 tracking-wider font-magic-title cursor-pointer transition-all shadow-[0_0_15px_rgba(251,191,36,0.1)]">
+              <span id="forceUnlockIcon">🔓</span> <span id="forceUnlockText">FORCE UNLOCK WISHBOOK</span>
+            </button>
+          </div>
+          
+          <div class="w-36 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mt-1"></div>
+        </div>
+
+        <!-- Tab 1 Contents: Polaroid Grid -->
+        <div id="tabPhotosContent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+          <!-- Dynamic Childhood Memories injected here -->
+        </div>
+
+        <!-- Tab 2 Contents: Letter from Self -->
+        <div id="tabLetterContent" class="hidden max-w-2xl mx-auto px-4">
+          <div class="glass-card-magical p-8 md:p-10 rounded-3xl border border-purple-500/20 relative overflow-hidden shadow-2xl">
+            <div class="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+            
+            <div class="text-center mb-6">
+              <span class="text-[10px] font-bold tracking-[0.3em] text-amber-400 uppercase font-magic-title">✦ A Message From Within ✦</span>
+              <h3 id="letterTitleDisplay" class="font-magic-title text-xl md:text-2xl font-bold text-white mt-2 filter drop-shadow-sm">
+                Surat untuk Masa Depan
+              </h3>
+            </div>
+            
+            <p id="letterDescDisplay" class="text-sm md:text-base italic text-slate-200 font-light font-sans-inter leading-relaxed text-left whitespace-pre-wrap">
+              Menapaki rasi usia yang baru...
+            </p>
+
+            <div id="letterLinkContainer" class="mt-8 text-center">
+              <a id="letterLinkDisplay" href="#" target="_blank" class="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-purple-900/60 to-indigo-900/60 hover:from-purple-900 hover:to-indigo-900 border border-purple-500/40 hover:border-amber-400 text-xs font-bold text-amber-300 tracking-wider font-magic-title uppercase rounded-xl transition-all shadow-md active:scale-95">
+                <span>Read Full Story on Medium</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SPELL FORM SECTION -->
+      <section class="w-full max-w-xl">
+        <div class="glass-magical rounded-3xl p-8 md:p-10 border border-purple-500/30 relative overflow-hidden">
+          <!-- Ambient glowing top bar -->
+          <div class="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+
+          <div class="flex items-center gap-4 mb-8">
+            <div class="p-3 bg-indigo-950/80 border border-purple-500/40 rounded-2xl text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+              <!-- SVG Wand / Magic Spell Illustration -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                <path d="m15 4-2-2m2 2-2 2m2-2h4m-4 0v4M4.5 16.5 18 3M3 21l3-3M9.5 11.5 11 13" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="font-magic-title text-base font-bold text-white tracking-widest uppercase">Cast Your Wish Spell</h2>
+              <p class="text-xs text-purple-200 italic mt-0.5 font-medium">Pour your genuine words into this eternal cosmic stream</p>
+            </div>
+          </div>
+
+          <!-- LOCKED SEAL MESSAGE FOR AUDIENCE (Locked securely, unlocks with admin authorization) -->
+          <div id="lockedFormMessage" class="flex flex-col items-center justify-center text-center py-10 space-y-5">
+            <div class="relative">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 text-amber-400 animate-pulse">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 rounded-full animate-ping"></div>
+            </div>
+            <h3 class="font-magic-title text-lg font-bold text-amber-300 tracking-wider">Something magical awaits beyond this seal.</h3>
+            <p class="text-sm text-purple-200/90 italic max-w-sm leading-relaxed">
+              "The gateway is resting under the celestial veil. The spell portal can only be opened by the Keeper of Key."
+            </p>
+          </div>
+
+          <!-- SPELL FORM - Secretly locked and hidden by default -->
+          <form id="wishForm" class="space-y-6 font-sans-inter hidden">
+            <!-- Name Input Field -->
+            <div>
+              <label for="senderName" class="block text-[11px] font-bold text-slate-100 uppercase tracking-widest mb-2 ml-1 font-magic-title">Your True Name</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-purple-300 font-bold">
+                  <!-- SVG Sparks -->
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-amber-300">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                  </svg>
+                </span>
+                <input 
+                  type="text" 
+                  id="senderName" 
+                  maxlength="40" 
+                  required
+                  placeholder="Who are you, celestial traveler?" 
+                  class="w-full pl-11 pr-4 py-3.5 bg-slate-950/60 border border-purple-500/35 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 transition-all text-sm text-slate-100 placeholder-purple-200/50 backdrop-blur-sm font-medium"
+                >
+              </div>
+            </div>
+
+            <!-- Message Input Field -->
+            <div>
+              <label for="wishMessage" class="block text-[11px] font-bold text-slate-100 uppercase tracking-widest mb-2 ml-1 font-magic-title">Enchanted Wish</label>
+              <div class="relative">
+                <span class="absolute top-4 left-4 pointer-events-none text-purple-300 font-bold">
+                  <!-- SVG Scroll/Book -->
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-amber-300">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+                    <path d="M6 6h10M6 10h10M6 14h10" />
+                  </svg>
+                </span>
+                <textarea 
+                  id="wishMessage" 
+                  rows="4" 
+                  maxlength="300" 
+                  required
+                  placeholder="Inscribe your warm, magical prayers for Adit..." 
+                  class="w-full pl-11 pr-4 py-3.5 bg-slate-950/60 border border-purple-500/35 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 transition-all text-sm text-slate-100 placeholder-purple-200/50 backdrop-blur-sm resize-none leading-relaxed font-medium"
+                ></textarea>
+              </div>
+              <div class="flex justify-end mt-1.5">
+                <span id="charCount" class="text-xs text-amber-200/90 tracking-wider font-semibold">0 / 300</span>
+              </div>
+            </div>
+
+            <!-- Cast Button -->
+            <button 
+              type="submit" 
+              id="submitBtn"
+              class="w-full py-4 px-6 bg-gradient-to-r from-purple-950 via-indigo-950 to-purple-900 hover:from-purple-900 hover:to-indigo-900 text-slate-100 font-bold text-xs font-magic-title tracking-[0.2em] uppercase rounded-xl shadow-[0_4px_20px_rgba(139,92,246,0.3)] hover:shadow-[0_4px_25px_rgba(251,191,36,0.3)] active:scale-[0.99] transition-all flex items-center justify-center cursor-pointer border border-amber-400/30 hover:border-amber-400"
+            >
+              TRANSMIT SPELL
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- STATS DISPLAY -->
+      <section class="animate-pulse">
+        <div class="glass-magical py-3.5 px-8 rounded-full border border-purple-500/30 flex items-center gap-3.5 shadow-lg">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400"></span>
+          </span>
+          <p class="text-xs text-slate-100 tracking-[0.15em] uppercase flex items-center gap-1.5 font-magic-title font-bold">
+            Magical Wishes Cast: 
+            <span id="wishesCounter" class="font-extrabold text-amber-300 text-sm tracking-wider ml-1">0</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5 text-amber-300 animate-[spin_10s_linear_infinite] ml-1">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </p>
+        </div>
+      </section>
+
+      <!-- DYNAMIC WISHBOARD SECTION -->
+      <section id="wishWallSection" class="w-full max-w-5xl relative transition-all duration-700">
+        <div class="text-center mb-10">
+          <h2 class="font-magic-title text-2xl md:text-3xl font-bold text-white tracking-widest uppercase filter drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+            Enchanted Wish Board
+          </h2>
+          <div class="w-36 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mt-3"></div>
+        </div>
+
+        <!-- MAIN DYNAMIC CONTENT GRID -->
+        <div id="unlockedContent" class="opacity-100 transition-all duration-1000">
+          
+          <!-- Real-time Loading Placeholder -->
+          <div id="loadingState" class="flex flex-col items-center py-16">
+            <div class="relative w-16 h-16 flex items-center justify-center">
+              <div class="absolute inset-0 rounded-full border-4 border-purple-500/20 border-t-amber-400 animate-[spin_1.5s_linear_infinite]"></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 text-amber-400 animate-pulse">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+              </svg>
+            </div>
+            <p class="text-amber-300 text-xs mt-5 tracking-widest font-magic-title font-bold uppercase">Summoning star spells...</p>
+          </div>
+
+          <!-- Empty State (Locked Default State) -->
+          <div id="emptyState" class="hidden text-center py-20 px-6 glass-magical rounded-3xl max-w-md mx-auto border-purple-500/15">
+            <div class="flex justify-center mb-4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-12 h-12 text-amber-300 animate-pulse">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+              </svg>
+            </div>
+            <p class="text-white font-bold text-lg">The skies are silent...</p>
+            <p class="text-xs text-purple-200 mt-1.5 leading-relaxed font-semibold">The magic is still awakening...</p>
+          </div>
+
+          <!-- Masonry Grid for Wishes -->
+          <div id="wishGrid" class="wishes-masonry w-full px-2">
+            <!-- Wishes injected dynamically -->
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-12 py-10 text-center border-t border-purple-950/60 w-full max-w-xl font-magic-title">
+      <p class="text-[10px] text-slate-100 tracking-[0.3em] uppercase font-bold">Created with celestial stardust &amp; magic for Adit's 22nd Journey.</p>
+      <p class="mt-2 text-[11px] text-amber-300 tracking-[0.25em] uppercase font-extrabold">&copy; Candra Aditya, 2026</p>
+    </footer>
+
+  </div>
+
+  <!-- MEMORY LIGHTBOX ZOOM MODAL -->
+  <div id="lightboxModal" class="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-500" style="display: none;">
+    <div class="glass-card-magical bg-[#0a0d1a]/95 max-w-2xl w-full rounded-3xl p-6 md:p-8 shadow-[0_0_50px_rgba(251,191,36,0.25)] relative border border-amber-500/30 transform scale-95 transition-transform duration-500 flex flex-col items-center">
+      <!-- Close button -->
+      <button 
+        id="closeLightboxBtn" 
+        class="absolute top-4 right-4 text-slate-100 hover:text-amber-300 bg-indigo-950 border border-purple-500/30 p-2 rounded-full transition-colors cursor-pointer z-10"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      <div class="w-full h-80 sm:h-96 rounded-2xl overflow-hidden shadow-inner relative mb-6">
+        <img id="lightboxImg" src="" alt="Zoomed Memory" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+      </div>
+
+      <h3 id="lightboxTitle" class="font-magic-title text-xl md:text-2xl font-bold text-amber-300 mb-3 tracking-wide filter drop-shadow-sm">
+        Memory Title
+      </h3>
+      <p id="lightboxDesc" class="text-sm md:text-base italic text-slate-200 font-light font-sans-inter leading-relaxed max-w-xl text-center">
+        Memory Description Goes Here...
+      </p>
+    </div>
+  </div>
+
+  <!-- SPECIAL CELEBRATION MODAL DIALOG (Spell Cast Successfully) -->
+  <div id="celebrationModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-500" style="display: none;">
+    <div class="glass-card-magical bg-[#0d1020]/95 max-w-md w-full rounded-3xl p-6 md:p-8 shadow-[0_0_50px_rgba(139,92,246,0.4)] relative border border-purple-500/40 transform scale-95 transition-transform duration-500 flex flex-col items-center text-center overflow-hidden">
+      
+      <!-- Faint Fireflies container background -->
+      <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden" id="modalFireflyContainer">
+        <!-- Firefly dots will be populated by JS here -->
+      </div>
+
+      <!-- Ambient background decoration -->
+      <div class="absolute -top-12 -left-12 w-36 h-36 bg-purple-600/20 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-12 -right-12 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Close Button -->
+      <button 
+        id="closeModalBtn" 
+        class="absolute top-4 right-4 text-slate-100 hover:text-amber-300 bg-indigo-950 border border-purple-500/30 p-2 rounded-full transition-colors cursor-pointer z-10"
+      >
+        <!-- SVG Close Cross -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      <!-- Custom Star SVG Header -->
+      <div class="w-16 h-16 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-2xl flex items-center justify-center text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.5)] mb-6 animate-bounce relative z-10">
+        <svg viewBox="0 0 100 100" class="w-10 h-10 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+          <polygon points="50,5 64.3,34.1 96,38.7 73,61.1 78.4,92.7 50,77.8 21.6,92.7 27,61.1 4,38.7 35.7,34.1" fill="#1E1B4B"/>
+        </svg>
+      </div>
+
+      <!-- Modal Heading -->
+      <h3 class="font-magic-title text-2xl font-bold text-white mb-2 tracking-wide relative z-10 filter drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
+        Spell Cast Successfully!
+      </h3>
+      <p class="text-xs text-amber-200 font-extrabold font-magic-title tracking-wider uppercase mb-6 relative z-10">
+        Thank you for celebrating Adit's 22nd
+      </p>
+
+      <!-- Action Buttons (Portal & View Board) -->
+      <div class="flex flex-col sm:flex-row gap-3 w-full relative z-10 mt-4 font-sans-inter">
+        <button 
+          id="secretPortalBtn"
+          class="flex-1 py-3 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-bold text-xs uppercase tracking-widest rounded-xl shadow-lg active:scale-95 transition-all cursor-pointer border border-amber-300"
+        >
+          SECRET PORTAL
+        </button>
+        <button 
+          id="viewBoardBtn"
+          class="flex-1 py-3 bg-indigo-950 hover:bg-indigo-900 text-slate-200 font-bold text-xs uppercase tracking-widest rounded-xl shadow-md active:scale-95 transition-all cursor-pointer border border-purple-500/30"
+        >
+          VIEW WISH BOARD
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECONDARY MODAL: SECRET PORTAL DISCLOSURE -->
+  <div id="secretPortalModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-lg opacity-0 pointer-events-none transition-opacity duration-500" style="display: none;">
+    <div class="glass-card-magical bg-[#0a0d1a]/95 max-w-lg w-full rounded-3xl p-8 md:p-10 shadow-[0_0_60px_rgba(245,158,11,0.25)] relative border border-amber-500/30 transform scale-95 transition-transform duration-500 flex flex-col items-center text-center">
+      
+      <!-- Close button for secret portal -->
+      <button 
+        id="closePortalModalBtn" 
+        class="absolute top-4 right-4 text-slate-300 hover:text-amber-300 bg-indigo-950 border border-purple-500/20 p-2 rounded-full transition-colors cursor-pointer"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      <div class="text-amber-400 text-sm tracking-[0.4em] uppercase font-magic-title mb-6 animate-pulse">
+        ✦ Secret Message Unfolded ✦
+      </div>
+
+      <!-- Pure SVG Quill/Pena Bulu Decor -->
+      <div class="mb-6 opacity-80">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-10 h-10 text-amber-300 mx-auto animate-pulse">
+          <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
+          <line x1="16" y1="8" x2="2" y2="22" />
+          <line x1="17.5" y1="15" x2="9" y2="15" />
+        </svg>
+      </div>
+
+      <blockquote class="text-base md:text-lg italic text-slate-100 font-light font-sans-inter leading-relaxed bg-indigo-950/40 py-6 px-6 rounded-2xl border-l-4 border-amber-400 shadow-inner text-left mb-8">
+        "Thank you for leaving your wishes within this enchanted wishbook. Your kind words have become little lights that guide my path forward. As new chapters unfold and new adventures begin, I hope you'll continue to cheer me on and walk beneath the same stars with me."
+      </blockquote>
+
+      <p class="font-magic-decor text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400">
+        Candra Aditya
+      </p>
+
+      <button 
+        id="dismissPortalModalBtn"
+        class="mt-8 px-10 py-3 bg-indigo-950 hover:bg-indigo-900 border border-purple-500/40 text-xs font-bold font-magic-title tracking-widest uppercase rounded-xl shadow-md active:scale-95 transition-all cursor-pointer"
+      >
+        RETURN TO WISHBOOK
+      </button>
+    </div>
+  </div>
+
+  <!-- SPECIAL ADMIN LOGIN MODAL -->
+  <div id="adminLoginModal" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-500" style="display: none;">
+    <div class="glass-card-magical bg-[#0d1020]/95 max-w-sm w-full rounded-3xl p-8 shadow-[0_0_50px_rgba(139,92,246,0.4)] relative border border-purple-500/40 transform scale-95 transition-transform duration-500 flex flex-col items-center">
+      
+      <h3 class="font-magic-title text-xl font-bold text-white mb-6 tracking-wider text-center">
+        ADMIN SYSTEM LINK
+      </h3>
+
+      <div class="w-full space-y-4 font-sans-inter text-slate-100">
+        <div>
+          <label class="block text-[10px] font-semibold text-purple-300 uppercase tracking-widest mb-1.5">Username</label>
+          <input type="text" id="adminUser" class="w-full px-4 py-3 bg-slate-950/60 border border-purple-500/35 rounded-xl text-sm focus:outline-none focus:border-amber-400 text-slate-100">
+        </div>
+        <div>
+          <label class="block text-[10px] font-semibold text-purple-300 uppercase tracking-widest mb-1.5">Password</label>
+          <input type="password" id="adminPass" class="w-full px-4 py-3 bg-slate-950/60 border border-purple-500/35 rounded-xl text-sm focus:outline-none focus:border-amber-400 text-slate-100">
+        </div>
+        <p id="adminErrorMsg" class="text-xs text-rose-400 font-medium text-center hidden">Invalid credentials!</p>
+      </div>
+
+      <div class="flex gap-3 w-full mt-6 font-sans-inter">
+        <button id="cancelAdminBtn" class="flex-1 py-3 bg-indigo-950 hover:bg-indigo-900 text-slate-200 border border-purple-500/30 text-xs font-bold uppercase tracking-wider rounded-xl cursor-pointer">
+          CANCEL
+        </button>
+        <button id="loginAdminBtn" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl cursor-pointer">
+          LOGIN
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CUSTOM CONFIRM DELETE MODAL -->
+  <div id="confirmDeleteModal" class="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300" style="display: none;">
+    <div class="glass-card-magical bg-[#0a0d1a]/95 max-w-sm w-full rounded-2xl p-6 shadow-2xl border border-rose-500/30 text-center transform scale-95 transition-transform duration-300">
+      <h3 class="font-magic-title text-lg font-bold text-rose-400 mb-3 tracking-widest uppercase">Erase Star Spell?</h3>
+      <p class="font-sans-inter text-slate-200 text-sm mb-6 leading-relaxed">Are you sure you want to permanently delete this wish from the cosmic board?</p>
+      
+      <div class="flex gap-3 font-sans-inter">
+        <button id="cancelDeleteBtn" class="flex-1 py-2.5 bg-indigo-950 hover:bg-indigo-900 border border-purple-500/20 text-xs font-bold text-slate-200 uppercase rounded-xl cursor-pointer">
+          CANCEL
+        </button>
+        <button id="confirmDeleteBtn" class="flex-1 py-2.5 bg-rose-900 hover:bg-rose-800 text-white text-xs font-bold uppercase rounded-xl cursor-pointer">
+          ERASE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW EDITABLE CONTENT MODAL FOR ADMIN -->
+  <div id="contentEditorModal" class="fixed inset-0 z-[170] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-500" style="display: none;">
+    <div class="glass-card-magical bg-[#0a0d1a]/95 max-w-3xl w-full max-h-[85vh] overflow-y-auto rounded-3xl p-6 md:p-8 shadow-[0_0_50px_rgba(251,191,36,0.25)] relative border border-amber-500/30 transform scale-95 transition-transform duration-500 flex flex-col">
+      <!-- Close button -->
+      <button 
+        id="closeContentEditorBtn" 
+        class="absolute top-4 right-4 text-slate-100 hover:text-amber-300 bg-indigo-950 border border-purple-500/30 p-2 rounded-full transition-colors cursor-pointer z-10"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      <h3 class="font-magic-title text-xl md:text-2xl font-bold text-amber-300 mb-6 tracking-wide text-center">
+        ✦ Edit Memories &amp; Letter Content ✦
+      </h3>
+
+      <form id="contentEditorForm" class="space-y-6 font-sans-inter text-slate-100 text-sm">
+        
+        <!-- SECTION 1: POLAROID IMAGES -->
+        <div class="border-b border-purple-500/20 pb-6">
+          <h4 class="font-magic-title text-xs font-bold text-purple-300 tracking-wider uppercase mb-4">Section A: Childhood Polaroid Photos</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Photo 1 -->
+            <div class="bg-indigo-950/30 p-4 rounded-xl border border-purple-500/10 space-y-3">
+              <span class="text-xs font-bold text-amber-300 font-magic-title">Polaroid Slot 1</span>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Image URL / File</label>
+                <div class="flex gap-2">
+                  <input type="text" id="editPhotoImg1" class="flex-1 px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+                  <label class="px-3 py-2 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-500/30 rounded-lg text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center justify-center cursor-pointer transition-colors shrink-0">
+                    Browse
+                    <input type="file" id="editPhotoFile1" accept="image/*" class="hidden">
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Title</label>
+                <input type="text" id="editPhotoTitle1" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Description</label>
+                <textarea id="editPhotoDesc1" rows="2" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400 resize-none"></textarea>
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Celestial Tag</label>
+                <input type="text" id="editPhotoTag1" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+              </div>
+            </div>
+
+            <!-- Photo 2 -->
+            <div class="bg-indigo-950/30 p-4 rounded-xl border border-purple-500/10 space-y-3">
+              <span class="text-xs font-bold text-amber-300 font-magic-title">Polaroid Slot 2</span>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Image URL / File</label>
+                <div class="flex gap-2">
+                  <input type="text" id="editPhotoImg2" class="flex-1 px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+                  <label class="px-3 py-2 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-500/30 rounded-lg text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center justify-center cursor-pointer transition-colors shrink-0">
+                    Browse
+                    <input type="file" id="editPhotoFile2" accept="image/*" class="hidden">
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Title</label>
+                <input type="text" id="editPhotoTitle2" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Description</label>
+                <textarea id="editPhotoDesc2" rows="2" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400 resize-none"></textarea>
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Celestial Tag</label>
+                <input type="text" id="editPhotoTag2" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+              </div>
+            </div>
+
+            <!-- Photo 3 -->
+            <div class="bg-indigo-950/30 p-4 rounded-xl border border-purple-500/10 space-y-3">
+              <span class="text-xs font-bold text-amber-300 font-magic-title">Polaroid Slot 3</span>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Image URL / File</label>
+                <div class="flex gap-2">
+                  <input type="text" id="editPhotoImg3" class="flex-1 px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+                  <label class="px-3 py-2 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-500/30 rounded-lg text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center justify-center cursor-pointer transition-colors shrink-0">
+                    Browse
+                    <input type="file" id="editPhotoFile3" accept="image/*" class="hidden">
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Title</label>
+                <input type="text" id="editPhotoTitle3" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Description</label>
+                <textarea id="editPhotoDesc3" rows="2" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400 resize-none"></textarea>
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Celestial Tag</label>
+                <input type="text" id="editPhotoTag3" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+              </div>
+            </div>
+
+            <!-- Photo 4 -->
+            <div class="bg-indigo-950/30 p-4 rounded-xl border border-purple-500/10 space-y-3">
+              <span class="text-xs font-bold text-amber-300 font-magic-title">Polaroid Slot 4</span>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Image URL / File</label>
+                <div class="flex gap-2">
+                  <input type="text" id="editPhotoImg4" class="flex-1 px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+                  <label class="px-3 py-2 bg-purple-900/40 hover:bg-purple-900/60 border border-purple-500/30 rounded-lg text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center justify-center cursor-pointer transition-colors shrink-0">
+                    Browse
+                    <input type="file" id="editPhotoFile4" accept="image/*" class="hidden">
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Title</label>
+                <input type="text" id="editPhotoTitle4" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Description</label>
+                <textarea id="editPhotoDesc4" rows="2" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400 resize-none"></textarea>
+              </div>
+              <div>
+                <label class="block text-[10px] text-purple-200/70 uppercase font-semibold mb-1">Celestial Tag</label>
+                <input type="text" id="editPhotoTag4" class="w-full px-3 py-2 bg-slate-950/60 border border-purple-500/20 rounded-lg text-xs text-white focus:outline-none focus:border-amber-400">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <button 
+          type="submit" 
+          class="w-full py-4 px-6 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold text-xs font-magic-title tracking-widest uppercase rounded-xl shadow-lg hover:shadow-[0_0_20px_rgba(251,191,36,0.4)] transition-all cursor-pointer"
+        >
+          SAVE CELESTIAL CONTENT
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom Alert Toast Area -->
+  <div id="toastContainer" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center gap-2 pointer-events-none w-full max-w-sm px-4"></div>
+
+  <!-- FIREBASE SCRIPTS AND CUSTOM SCRIPT -->
+  <script type="module">
+    // Import the Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Global variables
+    let currentUser = null;
+    let wishesColRef = null;
+    let settingsDocRef = null;
+    let memoriesDocRef = null; // Doc reference for shared global memories
+    let localBackupMode = false;
+    let isAdminActive = false;
+    let deleteTargetId = null;
+    let db = null;
+    let adminForceUnlocked = JSON.parse(localStorage.getItem('adit_wishbook_force_unlocked')) || false;
+    let countdownExpired = false;
+
+    // GLOBAL UNIFIED APP ID TO PREVENT DELETION PATH MISMATCH
+    let currentAppId = "adits-22nd-wishbook";
+
+    // Elements
+    const wishForm = document.getElementById('wishForm');
+    const senderNameInput = document.getElementById('senderName');
+    const wishMessageTextarea = document.getElementById('wishMessage');
+    const charCount = document.getElementById('charCount');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const wishGrid = document.getElementById('wishGrid');
+    const wishesCounter = document.getElementById('wishesCounter');
+
+    const celebrationModal = document.getElementById('celebrationModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const viewBoardBtn = document.getElementById('viewBoardBtn');
+    
+    const secretPortalBtn = document.getElementById('secretPortalBtn');
+    const secretPortalModal = document.getElementById('secretPortalModal');
+    const closePortalModalBtn = document.getElementById('closePortalModalBtn');
+    const dismissPortalModalBtn = document.getElementById('dismissPortalModalBtn');
+
+    const toastContainer = document.getElementById('toastContainer');
+    const enterWorldBtn = document.getElementById('enterWorldBtn');
+    const introScreen = document.getElementById('introScreen');
+
+    const exitWorldBtn = document.getElementById('exitWorldBtn');
+    const realityOverlay = document.getElementById('realityOverlay');
+    const returnStarsBtn = document.getElementById('returnStarsBtn');
+
+    // Constellation Gateway elements
+    const memoriesGateway = document.getElementById('memoriesGateway');
+    const revealMemoriesBtn = document.getElementById('revealMemoriesBtn');
+    const nostalgiaTabsGallery = document.getElementById('nostalgiaTabsGallery');
+    const backToHomeBtn = document.getElementById('backToHomeBtn');
+
+    // Admin Elements
+    const adminBtn = document.getElementById('adminBtn');
+    const adminLoginModal = document.getElementById('adminLoginModal');
+    const adminUser = document.getElementById('adminUser');
+    const adminPass = document.getElementById('adminPass');
+    const loginAdminBtn = document.getElementById('loginAdminBtn');
+    const cancelAdminBtn = document.getElementById('cancelAdminBtn');
+    const adminErrorMsg = document.getElementById('adminErrorMsg');
+
+    const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const toggleForceUnlockBtn = document.getElementById('toggleForceUnlockBtn');
+
+    // Tab Contents and Editors Elements
+    const tabPhotosBtn = document.getElementById('tabPhotosBtn');
+    const tabLetterBtn = document.getElementById('tabLetterBtn');
+    const tabPhotosContent = document.getElementById('tabPhotosContent');
+    const tabLetterContent = document.getElementById('tabLetterContent');
+    const adminEditContentWrapper = document.getElementById('adminEditContentWrapper');
+    const openContentEditorBtn = document.getElementById('openContentEditorBtn');
+    const contentEditorModal = document.getElementById('contentEditorModal');
+    const closeContentEditorBtn = document.getElementById('closeContentEditorBtn');
+    const contentEditorForm = document.getElementById('contentEditorForm');
+
+    // Dynamic Elements Display inside Letter Tab
+    const letterTitleDisplay = document.getElementById('letterTitleDisplay');
+    const letterDescDisplay = document.getElementById('letterDescDisplay');
+    const letterLinkDisplay = document.getElementById('letterLinkDisplay');
+
+    // Music control setup
+    const musicToggleBtn = document.getElementById('musicToggleBtn');
+    const musicText = document.getElementById('musicText');
+    const musicPing = document.getElementById('musicPing');
+
+    // Local wishes backup
+    let localWishes = JSON.parse(localStorage.getItem('adit_wishbook_local_data')) || [];
+
+    // Memory default state
+    let memoriesData = {
+      photos: [
+        { title: "Awal Mula Sang Petualang", desc: "Langkah kecil pertamaku yang penuh tawa, mimpi sederhana, dan tatapan penuh rasa ingin tahu terhadap keindahan luasnya semesta.", img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80", tag: "Golden Age Wonders" },
+        { title: "Tawa Di Bawah Sinar Senja", desc: "Masa-masa ceria bermain tanpa beban, mengejar kunang-kunang di kala langit sore berganti menjadi permadani malam berhiaskan rasi bintang.", img: "https://images.unsplash.com/photo-1481841587433-622611899613?auto=format&fit=crop&w=600&q=80", tag: "Golden Twilight" },
+        { title: "Perekam Memori Abadi", desc: "Setiap senyuman, pelukan hangat dari keluarga, dan petualangan masa kecil tertangkap dalam cuplikan potret yang tak akan lekang oleh waktu.", img: "https://images.unsplash.com/photo-1508873699372-7aeab60b44ab?auto=format&fit=crop&w=600&q=80", tag: "Nostalgic Capture" },
+        { title: "Percikan Imajinasi & Sihir", desc: "Ketika dunia tampak ajaib dengan dongeng sebelum tidur, imajinasi masa kecilku menjadi fondasi kuat yang menerangi jalanku hingga detik ini.", img: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80", tag: "Spark of Wonder" }
+      ],
+      letter: {
+        title: "Surat Untuk Diriku yang Sedang Berlayar",
+        desc: "Menapaki rasi usia 22 tahun bukanlah sekadar angka, melainkan rangkaian babak baru dalam petualangan hidup. Di lembaran ini, aku menuliskan sebuah janji suci untuk tidak pernah melupakan mimpi-mimpi sederhana yang dulu kupeluk erat, serta bersiap menyambut samudera luas dengan penuh keteguhan jiwa.",
+        link: "https://medium.com"
+      }
+    };
+
+    // Load custom memories content from localstorage if exists (as fallback)
+    const storedMemories = localStorage.getItem('adit_wishbook_custom_memories');
+    if (storedMemories) {
+      try {
+        memoriesData = JSON.parse(storedMemories);
+      } catch (e) {
+        console.error("Failed loading memoriesData from localStorage.", e);
+      }
+    }
+
+    // Helper: Escaping HTML safely
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str.replace(/[&<>'\"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    // Helper: Display Toast (Centered and Symmetrical Layout)
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `animate-slide-in pointer-events-auto flex items-center justify-center text-center gap-3 py-3.5 px-6 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] border text-sm w-full ${
+        type === 'success' 
+          ? 'bg-slate-900 text-purple-100 border-purple-500/30' 
+          : 'bg-indigo-950 text-rose-200 border-rose-500/30'
+      }`;
+      
+      toast.innerHTML = `<span class="font-medium tracking-wide">${message}</span>`;
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Dynamic Photos and Letter rendering function
+    function renderMemoriesAndLetter() {
+      // 1. Render Photos Polaroid Grid
+      tabPhotosContent.innerHTML = '';
+      memoriesData.photos.forEach((photo, idx) => {
+        const rotationClass = idx % 2 === 0 ? '-rotate-2 hover:rotate-1' : 'rotate-3 hover:rotate-0';
+        const card = document.createElement('div');
+        card.className = `group relative bg-slate-950/80 p-4 pb-8 rounded-2xl border border-purple-500/20 shadow-lg transform ${rotationClass} hover:scale-105 hover:border-amber-400/50 hover:shadow-[0_0_25px_rgba(251,191,36,0.15)] transition-all duration-300 cursor-pointer overflow-hidden gallery-item`;
+        card.setAttribute('data-title', photo.title);
+        card.setAttribute('data-desc', photo.desc);
+        card.setAttribute('data-img', photo.img);
+        
+        card.innerHTML = `
+          <div class="w-full h-48 rounded-lg overflow-hidden relative">
+            <img src="${escapeHTML(photo.img)}" alt="${escapeHTML(photo.title)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x480/0e1329/FBBF24?text=Memory'">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0e1329]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </div>
+          <p class="mt-5 font-magic-title text-[10px] text-amber-300/80 text-center tracking-wider uppercase font-semibold">✦ ${escapeHTML(photo.tag)} ✦</p>
+        `;
+
+        // Re-attach lightbox zoom listeners
+        card.addEventListener('click', () => {
+          lightboxImg.src = photo.img;
+          lightboxTitle.textContent = photo.title;
+          lightboxDesc.textContent = photo.desc;
+
+          lightboxModal.style.display = 'flex';
+          setTimeout(() => {
+            lightboxModal.classList.remove('opacity-0', 'pointer-events-none');
+            lightboxModal.classList.add('opacity-100');
+            lightboxModal.querySelector('.glass-card-magical').style.transform = 'scale(1)';
+          }, 50);
+        });
+
+        tabPhotosContent.appendChild(card);
+      });
+
+      // 2. Render Letter Content
+      letterTitleDisplay.textContent = memoriesData.letter.title;
+      letterDescDisplay.textContent = memoriesData.letter.desc;
+      if (memoriesData.letter.link && memoriesData.letter.link.trim() !== "") {
+        letterLinkDisplay.href = memoriesData.letter.link;
+        document.getElementById('letterLinkContainer').classList.remove('hidden');
+      } else {
+        document.getElementById('letterLinkContainer').classList.add('hidden');
+      }
+    }
+
+    // Tab switching event handlers
+    tabPhotosBtn.addEventListener('click', () => {
+      tabPhotosBtn.className = "px-6 py-2.5 rounded-full text-xs font-bold font-magic-title tracking-widest uppercase transition-all duration-300 cursor-pointer bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.4)]";
+      tabLetterBtn.className = "px-6 py-2.5 rounded-full text-xs font-bold font-magic-title tracking-widest uppercase transition-all duration-300 cursor-pointer text-purple-200 hover:text-white ml-1";
+      tabPhotosContent.classList.remove('hidden');
+      tabLetterContent.classList.add('hidden');
+    });
+
+    tabLetterBtn.addEventListener('click', () => {
+      tabLetterBtn.className = "px-6 py-2.5 rounded-full text-xs font-bold font-magic-title tracking-widest uppercase transition-all duration-300 cursor-pointer bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.4)]";
+      tabPhotosBtn.className = "px-6 py-2.5 rounded-full text-xs font-bold font-magic-title tracking-widest uppercase transition-all duration-300 cursor-pointer text-purple-200 hover:text-white ml-1";
+      tabLetterContent.classList.remove('hidden');
+      tabPhotosContent.classList.add('hidden');
+    });
+
+    // Content Editor Modal Actions
+    openContentEditorBtn.addEventListener('click', () => {
+      // Populate Form inputs with current memories data
+      memoriesData.photos.forEach((photo, idx) => {
+        const i = idx + 1;
+        document.getElementById(`editPhotoImg${i}`).value = photo.img;
+        document.getElementById(`editPhotoTitle${i}`).value = photo.title;
+        document.getElementById(`editPhotoDesc${i}`).value = photo.desc;
+        document.getElementById(`editPhotoTag${i}`).value = photo.tag;
+      });
+
+      document.getElementById('editLetterTitle').value = memoriesData.letter.title;
+      document.getElementById('editLetterDesc').value = memoriesData.letter.desc;
+      document.getElementById('editLetterLink').value = memoriesData.letter.link;
+
+      contentEditorModal.style.display = 'flex';
+      setTimeout(() => {
+        contentEditorModal.classList.remove('opacity-0', 'pointer-events-none');
+        contentEditorModal.classList.add('opacity-100');
+        contentEditorModal.querySelector('.glass-card-magical').style.transform = 'scale(1)';
+      }, 50);
+    });
+
+    function closeContentEditor() {
+      contentEditorModal.classList.add('opacity-0', 'pointer-events-none');
+      contentEditorModal.classList.remove('opacity-100');
+      contentEditorModal.querySelector('.glass-card-magical').style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        contentEditorModal.style.display = 'none';
+      }, 500);
+    }
+
+    closeContentEditorBtn.addEventListener('click', closeContentEditor);
+
+    // Save customized memories (Globally Synchronized across devices!)
+    contentEditorForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Collect updated inputs
+      const updatedPhotos = [];
+      for (let i = 1; i <= 4; i++) {
+        updatedPhotos.push({
+          img: document.getElementById(`editPhotoImg${i}`).value.trim(),
+          title: document.getElementById(`editPhotoTitle${i}`).value.trim(),
+          desc: document.getElementById(`editPhotoDesc${i}`).value.trim(),
+          tag: document.getElementById(`editPhotoTag${i}`).value.trim()
+        });
+      }
+
+      const updatedMemories = {
+        photos: updatedPhotos,
+        letter: {
+          title: document.getElementById('editLetterTitle').value.trim(),
+          desc: document.getElementById('editLetterDesc').value.trim(),
+          link: document.getElementById('editLetterLink').value.trim()
+        }
+      };
+
+      if (localBackupMode) {
+        memoriesData = updatedMemories;
+        // Backup to localstorage
+        localStorage.setItem('adit_wishbook_custom_memories', JSON.stringify(memoriesData));
+        renderMemoriesAndLetter();
+        closeContentEditor();
+        showToast("Memories updated locally!");
+      } else {
+        try {
+          // Rule 1: Saving path `/artifacts/{appId}/public/data/config/memories`
+          await setDoc(memoriesDocRef, updatedMemories);
+          closeContentEditor();
+          showToast("Celestial memories updated globally across all devices! ✦");
+        } catch (err) {
+          console.error("Failed to sync global memories:", err);
+          showToast("Failed to synchronize memories across devices.", "error");
+        }
+      }
+    });
+
+    // Handle Local File Upload Compression
+    for (let i = 1; i <= 4; i++) {
+      const fileInput = document.getElementById(`editPhotoFile${i}`);
+      const urlInput = document.getElementById(`editPhotoImg${i}`);
+      if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            const img = new Image();
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              const maxDim = 800; // Best optimization size
+              let w = img.width;
+              let h = img.height;
+              if (w > maxDim || h > maxDim) {
+                if (w > h) {
+                  h = Math.round((h * maxDim) / w);
+                  w = maxDim;
+                } else {
+                  w = Math.round((w * maxDim) / h);
+                  h = maxDim;
+                }
+              }
+              canvas.width = w;
+              canvas.height = h;
+              ctx.drawImage(img, 0, 0, w, h);
+              const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+              urlInput.value = compressedBase64;
+              showToast(`Foto Slot ${i} berhasil dimuat!`);
+            };
+            img.src = evt.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
+    // Countdown Lock & Admin Force Open Logic
+    window.checkLockState = function() {
+      const targetDate = new Date("July 19, 2026 00:00:00").getTime();
+      const now = Date.now();
+      countdownExpired = (now >= targetDate);
+
+      // Wish form & Open Constellation should unlock if countdown has expired, or admin actively forced unlock, or admin is logged in
+      const shouldUnlock = countdownExpired || adminForceUnlocked || isAdminActive;
+
+      const lockedMsg = document.getElementById('lockedFormMessage');
+      const form = document.getElementById('wishForm');
+      const gatewayTitle = document.getElementById('memoriesGatewayTitle');
+
+      if (shouldUnlock) {
+        lockedMsg.classList.add('hidden');
+        form.classList.remove('hidden');
+        if (revealMemoriesBtn) {
+          revealMemoriesBtn.innerHTML = "✦ Open Constellation ✦";
+          revealMemoriesBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          revealMemoriesBtn.classList.add('cursor-pointer');
+        }
+        if (gatewayTitle) {
+          gatewayTitle.innerHTML = "Walk Through Adit's Constellation of Memories";
+        }
+      } else {
+        lockedMsg.classList.remove('hidden');
+        form.classList.add('hidden');
+        if (revealMemoriesBtn) {
+          revealMemoriesBtn.innerHTML = "🔒 Sealed by The Stars";
+          revealMemoriesBtn.classList.add('opacity-50', 'cursor-not-allowed');
+          revealMemoriesBtn.classList.remove('cursor-pointer');
+        }
+        if (gatewayTitle) {
+          gatewayTitle.innerHTML = "🔒 Memories Sealed by The Stars";
+        }
+      }
+
+      // Update override toggle text
+      const toggleBtnText = document.getElementById('forceUnlockText');
+      const toggleBtnIcon = document.getElementById('forceUnlockIcon');
+      if (toggleBtnText) {
+        if (adminForceUnlocked) {
+          toggleBtnText.textContent = "LOCK WISHBOOK (OVERRIDE ACTIVE)";
+          toggleBtnIcon.textContent = "🔒";
+        } else {
+          toggleBtnText.textContent = "FORCE UNLOCK WISHBOOK";
+          toggleBtnIcon.textContent = "🔓";
+        }
+      }
+    }
+
+    // Toggle override open/lock wishbook
+    toggleForceUnlockBtn.addEventListener('click', async () => {
+      const newStatus = !adminForceUnlocked;
+      if (localBackupMode) {
+        adminForceUnlocked = newStatus;
+        localStorage.setItem('adit_wishbook_force_unlocked', JSON.stringify(newStatus));
+        checkLockState();
+        showToast(newStatus ? "Wishbook dipaksa terbuka untuk umum!" : "Wishbook dikunci kembali.");
+      } else {
+        try {
+          await setDoc(settingsDocRef, { forceUnlocked: newStatus }, { merge: true });
+          showToast(newStatus ? "Wishbook dipaksa terbuka secara publik!" : "Wishbook dikunci kembali secara publik.");
+        } catch (err) {
+          console.error("Failed to update remote settings override:", err);
+          showToast("Gagal menyimpan konfigurasi kosmik.", "error");
+        }
+      }
+    });
+
+    // Core function to display wishes grid
+    function displayWishesGrid(wishes) {
+      wishGrid.innerHTML = '';
+      wishes.forEach((wish, index) => {
+        const card = document.createElement('div');
+        card.className = "masonry-item glass-card-magical p-6 rounded-2xl relative overflow-hidden animate-card-reveal flex flex-col justify-between";
+        card.style.animationDelay = `${index * 0.05}s`;
+
+        let displayTime = 'Just now';
+        if (wish.timestamp) {
+          if (typeof wish.timestamp === 'number') {
+            const date = new Date(wish.timestamp);
+            displayTime = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' ' + date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+          } else {
+            displayTime = wish.timestamp;
+          }
+        }
+
+        const escapedName = escapeHTML(wish.name || 'Anonymous');
+        const escapedMessage = escapeHTML(wish.message || '');
+
+        card.innerHTML = `
+          <div class="absolute top-4 right-4 text-[9px] text-amber-400/40 font-magic-title tracking-widest">✦</div>
+          <div class="flex flex-col justify-between h-full">
+            <div>
+              <h4 class="font-magic-title text-xs font-bold text-amber-300 tracking-wider mb-3 flex items-center gap-2">
+                <span class="inline-block w-1 h-1 rounded-full bg-amber-400"></span> ${escapedName}
+              </h4>
+              <p class="text-sm text-slate-300 leading-relaxed font-light italic">
+                "${escapedMessage}"
+              </p>
+            </div>
+            <div class="mt-5 pt-3 border-t border-purple-500/10 flex justify-between items-center text-[9px] tracking-widest text-purple-400/40 uppercase font-magic-title">
+              <span>Blessed Vessel</span>
+              <span>${displayTime}</span>
+            </div>
+            ${isAdminActive ? `
+            <button class="delete-wish-btn mt-4 py-1.5 px-3 bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 text-[10px] font-bold text-rose-300 uppercase rounded-lg tracking-widest transition-colors cursor-pointer" data-id="${wish.id}">
+              ERASE SPELL
+            </button>
+            ` : ''}
+          </div>
+        `;
+        wishGrid.appendChild(card);
+      });
+
+      // Attach deletion event listeners to newly generated buttons
+      if (isAdminActive) {
+        document.querySelectorAll('.delete-wish-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            deleteTargetId = e.currentTarget.getAttribute('data-id');
+            openConfirmDeleteModal();
+          });
+        });
+      }
+    }
+
+    // Local wishes list renderer
+    function renderWishesLocally() {
+      wishesCounter.textContent = localWishes.length;
+      if (localWishes.length === 0) {
+        emptyState.classList.remove('hidden');
+        wishGrid.innerHTML = '';
+      } else {
+        emptyState.classList.add('hidden');
+        const sorted = [...localWishes].sort((a, b) => b.timestamp - a.timestamp);
+        displayWishesGrid(sorted);
+      }
+    }
+
+    // Realtime Database Firestore Listener
+    function listenToWishesRealtime() {
+      if (!wishesColRef) return;
+      loadingState.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+
+      onSnapshot(wishesColRef, (snapshot) => {
+        loadingState.classList.add('hidden');
+        let wishes = [];
+        snapshot.forEach((doc) => {
+          wishes.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Client sorting newest first
+        wishes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+        wishesCounter.textContent = wishes.length;
+
+        if (wishes.length === 0) {
+          emptyState.classList.remove('hidden');
+          wishGrid.innerHTML = '';
+        } else {
+          emptyState.classList.add('hidden');
+          displayWishesGrid(wishes);
+        }
+      }, (err) => {
+        console.error("Firestore error:", err);
+        loadingState.classList.add('hidden');
+        showToast("Database synchronization failed.", "error");
+      });
+    }
+
+    // Realtime configuration settings listener
+    function listenToSettingsRealtime() {
+      if (!settingsDocRef) return;
+      onSnapshot(settingsDocRef, (snapshot) => {
+        if (snapshot.exists()) {
+          adminForceUnlocked = snapshot.data().forceUnlocked || false;
+        } else {
+          adminForceUnlocked = false;
+        }
+        checkLockState();
+      }, (err) => {
+        console.error("Settings load error:", err);
+      });
+    }
+
+    // Realtime configuration shared memories listener (Syncs photos & story across devices!)
+    function listenToMemoriesRealtime() {
+      if (!memoriesDocRef) return;
+      onSnapshot(memoriesDocRef, (snapshot) => {
+        if (snapshot.exists()) {
+          memoriesData = snapshot.data();
+          renderMemoriesAndLetter();
+        }
+      }, (err) => {
+        console.error("Global memories loaded fallback to Local Storage:", err);
+      });
+    }
+
+    // Domestic User Variable Configuration (Hibrida / Auto Fallback)
+    const setupFirebaseAndInit = async () => {
+      try {
+        const productionFirebaseConfig = {
+          apiKey: "AIzaSyANGuUEOWvgkjrf91qvuE0YknjsgK173hs",
+          authDomain: "adits22ndwishbook.firebaseapp.com",
+          databaseURL: "https://adits22ndwishbook-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "adits22ndwishbook",
+          storageBucket: "adits22ndwishbook.firebasestorage.app",
+          messagingSenderId: "815695031343",
+          appId: "1:815695031343:web:274c43836227b35ad76ada",
+          measurementId: "G-BG9LV5EH4M"
+        };
+
+        const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config) 
+          ? JSON.parse(__firebase_config) 
+          : productionFirebaseConfig;
+
+        currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'adits-22nd-wishbook';
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        db = getFirestore(app);
+
+        // Anonymous authentication before Firestore query (Requirement Rule 3)
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          currentUser = user;
+          if (user) {
+            // Path matches Rule 1 strictly
+            wishesColRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'wishes');
+            settingsDocRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'config', 'settings');
+            memoriesDocRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'config', 'memories');
+            
+            listenToWishesRealtime();
+            listenToSettingsRealtime();
+            listenToMemoriesRealtime();
+          }
+        });
+      } catch (err) {
+        console.warn("Failed to initiate Firebase. Activating secure Local Storage Fallback:", err);
+        activateLocalBackupMode();
+      }
+    };
+
+    // LOCAL FALLBACK MODE
+    function activateLocalBackupMode() {
+      localBackupMode = true;
+      loadingState.classList.add('hidden');
+      renderWishesLocally();
+      checkLockState();
+    }
+
+    // Execute setup on load
+    window.addEventListener('load', () => {
+      setupFirebaseAndInit();
+      renderMemoriesAndLetter();
+    });
+
+    // Character Counter Real-time Update
+    wishMessageTextarea.addEventListener('input', () => {
+      const len = wishMessageTextarea.value.length;
+      charCount.textContent = `${len} / 300`;
+    });
+
+    // Memicu letusan confetti
+    function triggerConfettiEffect() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#FBBF24', '#C4B5FD', '#312E81', '#5B21B6']
+        });
+      }
+    }
+
+    // HANDLE SPELL CAST FORM SUBMISSION (FIXED PAGE RELOAD BUG)
+    wishForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Menghentikan reload halaman bawaan browser
+      
+      const name = senderNameInput.value.trim();
+      const message = wishMessageTextarea.value.trim();
+      
+      if (!name || !message) {
+        showToast("Mohon tuliskan nama dan doa indahmu.", "error");
+        return;
+      }
+
+      // Menonaktifkan tombol submit selama pengiriman berlangsung
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "TRANSMITTING TO STARS...";
+
+      const newWish = {
+        name: name,
+        message: message,
+        timestamp: Date.now()
+      };
+
+      if (localBackupMode) {
+        // Mode fallback jika Firebase tidak aktif
+        newWish.id = crypto.randomUUID();
+        localWishes.push(newWish);
+        localStorage.setItem('adit_wishbook_local_data', JSON.stringify(localWishes));
+        
+        // Reset Form
+        wishForm.reset();
+        charCount.textContent = "0 / 300";
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "TRANSMIT SPELL";
+
+        // Tampilkan letusan efek Confetti, modal selebrasi kustom, & toast sukses
+        triggerConfettiEffect();
+        openCelebrationModal();
+        renderWishesLocally();
+        showToast("Star Spell Cast Locally! ✦");
+      } else {
+        try {
+          // Aturan 1: Simpan di path `/artifacts/{appId}/public/data/wishes`
+          await addDoc(wishesColRef, newWish);
+          
+          // Reset Form
+          wishForm.reset();
+          charCount.textContent = "0 / 300";
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "TRANSMIT SPELL";
+
+          // Tampilkan letusan efek Confetti, modal selebrasi kustom, & toast sukses
+          triggerConfettiEffect();
+          openCelebrationModal();
+          showToast("Star Spell Transmitted Successfully! ✦");
+        } catch (err) {
+          console.error("Gagal mengirim doa ke bintang:", err);
+          showToast("Cosmic gateway connection failed.", "error");
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "TRANSMIT SPELL";
+        }
+      }
+    });
+
+    // Reveal Constellation Memories action
+    revealMemoriesBtn.addEventListener('click', () => {
+      const targetDate = new Date("July 19, 2026 00:00:00").getTime();
+      const now = Date.now();
+      const shouldUnlock = (now >= targetDate) || adminForceUnlocked || isAdminActive;
+
+      if (!shouldUnlock) {
+        showToast("Rasi bintang memori masih tersegel oleh waktu.", "error");
+        return;
+      }
+
+      memoriesGateway.classList.add('hidden');
+      nostalgiaTabsGallery.classList.remove('hidden');
+      nostalgiaTabsGallery.classList.add('animate-card-reveal');
+      showToast("Constellation of memories unlocked!");
+    });
+
+    // Back to Home Gateway action
+    backToHomeBtn.addEventListener('click', () => {
+      nostalgiaTabsGallery.classList.add('hidden');
+      memoriesGateway.classList.remove('hidden');
+      memoriesGateway.classList.add('animate-card-reveal');
+      showToast("Returned to Celestial Gateway");
+    });
+
+    // -------------------------------------------------------------------------
+    // CELESTIAL MUSIC BOX SYNTHESIZER: HAPPY BIRTHDAY FULL SONG
+    // -------------------------------------------------------------------------
+    class CelestialMusicBox {
+      constructor() {
+        this.ctx = null;
+        this.isPlaying = false;
+        this.tempo = 94; // Tempo yang ceria namun tetap tenang dan bernapas kosmik
+        this.currentIndex = 0;
+        this.nextNoteTime = 0.0;
+        this.schedulerTimerId = null;
+        
+        // Melodi Lengkap "Happy Birthday to You" dalam Aransemen Music Box
+        this.melody = [
+          // Happy Birthday to you
+          { note: "C5", length: 0.5 }, { note: "C5", length: 0.5 },
+          { note: "D5", length: 1.0 }, { note: "C5", length: 1.0 },
+          { note: "F5", length: 1.0 }, { note: "E5", length: 2.0 },
+          
+          // Happy Birthday to you
+          { note: "C5", length: 0.5 }, { note: "C5", length: 0.5 },
+          { note: "D5", length: 1.0 }, { note: "C5", length: 1.0 },
+          { note: "G5", length: 1.0 }, { note: "F5", length: 2.0 },
+          
+          // Happy Birthday dear Adit
+          { note: "C5", length: 0.5 }, { note: "C5", length: 0.5 },
+          { note: "C6", length: 1.0 }, { note: "A5", length: 1.0 },
+          { note: "F5", length: 1.0 }, { note: "E5", length: 1.0 }, { note: "D5", length: 2.0 },
+          
+          // Happy Birthday to you
+          { note: "Bb5", length: 0.5 }, { note: "Bb5", length: 0.5 },
+          { note: "A5", length: 1.0 }, { note: "F5", length: 1.0 },
+          { note: "G5", length: 1.0 }, { note: "F5", length: 2.0 },
+          
+          // Istirahat udara kosmik sejenak sebelum loop berputar kembali
+          { note: "REST", length: 2.0 }
+        ];
+
+        this.frequencies = {
+          "C5": 523.25, "D5": 587.33, "E5": 659.25, "F5": 698.46, "G5": 783.99,
+          "A5": 880.00, "Bb5": 932.33, "C6": 1046.50, "REST": 0
+        };
+      }
+
+      initContext() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+
+      playTwinkle(frequency, time, duration) {
+        if (!this.ctx || frequency === 0) return;
+
+        // Tiga lapis osilator untuk meniru getaran bel murni Celesta & Music Box logam yang magis
+        const oscMain = this.ctx.createOscillator();
+        const oscSub = this.ctx.createOscillator();
+        const oscSparkle = this.ctx.createOscillator();
+        
+        oscMain.type = "sine"; // Gelombang sinus murni sebagai dasar lonceng
+        oscMain.frequency.setValueAtTime(frequency, time);
+
+        oscSub.type = "triangle"; // Memberikan tekstur kayu/logam ringan
+        oscSub.frequency.setValueAtTime(frequency * 2.0, time); // Harmoni 1-oktaf di atasnya
+
+        oscSparkle.type = "sine"; // Percikan magis Celesta
+        oscSparkle.frequency.setValueAtTime(frequency * 3.0, time); // Harmoni ke-3 yang lembut
+
+        // Pengatur Volume Mandiri (Envelopes)
+        const gainMain = this.ctx.createGain();
+        const gainSub = this.ctx.createGain();
+        const gainSparkle = this.ctx.createGain();
+
+        // Music Box Timbre: Attack instan dan sangat tajam, disusul decay eksponensial yang panjang
+        gainMain.gain.setValueAtTime(0.0, time);
+        gainMain.gain.linearRampToValueAtTime(0.16, time + 0.003); // Attack ultra cepat
+        gainMain.gain.exponentialRampToValueAtTime(0.001, time + duration * 2.6);
+
+        gainSub.gain.setValueAtTime(0.0, time);
+        gainSub.gain.linearRampToValueAtTime(0.03, time + 0.006);
+        gainSub.gain.exponentialRampToValueAtTime(0.001, time + duration * 1.5);
+
+        gainSparkle.gain.setValueAtTime(0.0, time);
+        gainSparkle.gain.linearRampToValueAtTime(0.012, time + 0.002);
+        gainSparkle.gain.exponentialRampToValueAtTime(0.001, time + duration * 1.2);
+
+        // Lowpass filter untuk memotong frekuensi tinggi yang menusuk, agar suara terdengar empuk & romantis
+        const lowpass = this.ctx.createBiquadFilter();
+        lowpass.type = "lowpass";
+        lowpass.frequency.setValueAtTime(11000, time);
+
+        // Efek Delay/Pantulan Ruang Angkasa
+        const delayNode = this.ctx.createDelay();
+        delayNode.delayTime.setValueAtTime(0.42, time); // Gema selaras tempo
+
+        const delayFeedback = this.ctx.createGain();
+        delayFeedback.gain.setValueAtTime(0.35, time); // Feedback volume gema
+
+        // Sambungan Jalur Audio
+        oscMain.connect(gainMain);
+        oscSub.connect(gainSub);
+        oscSparkle.connect(gainSparkle);
+
+        gainMain.connect(lowpass);
+        gainSub.connect(lowpass);
+        gainSparkle.connect(lowpass);
+
+        lowpass.connect(this.ctx.destination);
+
+        // Sambungan efek tunda (Delay)
+        lowpass.connect(delayNode);
+        delayNode.connect(delayFeedback);
+        delayFeedback.connect(delayNode);
+        delayFeedback.connect(this.ctx.destination);
+
+        // Memulai dan menghentikan getaran suara
+        oscMain.start(time);
+        oscSub.start(time);
+        oscSparkle.start(time);
+
+        oscMain.stop(time + duration * 3.2);
+        oscSub.stop(time + duration * 3.2);
+        oscSparkle.stop(time + duration * 3.2);
+      }
+
+      scheduler() {
+        while (this.nextNoteTime < this.ctx.currentTime + 0.1) {
+          const currentMelody = this.melody[this.currentIndex];
+          const freq = this.frequencies[currentMelody.note];
+          const beatDuration = 60.0 / this.tempo;
+          const noteDuration = currentMelody.length * beatDuration;
+
+          this.playTwinkle(freq, this.nextNoteTime, noteDuration);
+
+          this.nextNoteTime += noteDuration;
+          this.currentIndex = (this.currentIndex + 1) % this.melody.length;
+        }
+        
+        this.schedulerTimerId = setTimeout(() => this.scheduler(), 25);
+      }
+
+      start() {
+        this.initContext();
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+        this.isPlaying = true;
+        this.nextNoteTime = this.ctx.currentTime;
+        this.scheduler();
+      }
+
+      stop() {
+        this.isPlaying = false;
+        clearTimeout(this.schedulerTimerId);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // REALITY LOFI AMBIENT MUSIC SYNTHESIZER
+    // -------------------------------------------------------------------------
+    class LofiMusicSynthesizer {
+      constructor() {
+        this.ctx = null;
+        this.isPlaying = false;
+        this.tempo = 76; // Laid-back slow Lofi tempo
+        this.currentIndex = 0;
+        this.nextNoteTime = 0.0;
+        this.schedulerTimerId = null;
+
+        // Warm jazzy chords untuk E Major / G Major progressions
+        this.chords = [
+          [82.41, 164.81, 246.94, 329.63, 415.30],  // E Major
+          [110.00, 220.00, 277.18, 329.63, 440.00], // A Major
+          [103.83, 207.65, 246.94, 311.13, 415.30], // G#m
+          [110.00, 220.00, 277.18, 329.63, 440.00]  // A Major
+        ];
+      }
+
+      initContext() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+
+      playSwell(chordFreqs, time, duration) {
+        if (!this.ctx) return;
+
+        // Create warm lowpass filter to emulate lofi retro crackle/muffle warmth
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(650, time);
+        filter.connect(this.ctx.destination);
+
+        chordFreqs.forEach((freq) => {
+          const osc = this.ctx.createOscillator();
+          osc.type = "sine"; // Pure round sine wave
+          osc.frequency.setValueAtTime(freq, time);
+
+          const gainNode = this.ctx.createGain();
+          gainNode.gain.setValueAtTime(0.0, time);
+          gainNode.gain.linearRampToValueAtTime(0.06, time + 0.4);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, time + duration - 0.1);
+
+          osc.connect(gainNode);
+          gainNode.connect(filter);
+
+          osc.start(time);
+          osc.stop(time + duration);
+        });
+      }
+
+      scheduler() {
+        while (this.nextNoteTime < this.ctx.currentTime + 0.1) {
+          const currentChord = this.chords[this.currentIndex];
+          const beatDuration = 60.0 / this.tempo;
+          const chordDuration = beatDuration * 4; // 4 beats per chord block
+
+          this.playSwell(currentChord, this.nextNoteTime, chordDuration);
+
+          this.nextNoteTime += chordDuration;
+          this.currentIndex = (this.currentIndex + 1) % this.chords.length;
+        }
+        this.schedulerTimerId = setTimeout(() => this.scheduler(), 50);
+      }
+
+      start() {
+        this.initContext();
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+        this.isPlaying = true;
+        this.nextNoteTime = this.ctx.currentTime;
+        this.scheduler();
+      }
+
+      stop() {
+        this.isPlaying = false;
+        clearTimeout(this.schedulerTimerId);
+      }
+    }
+
+    const musicPlayer = new CelestialMusicBox();
+    const lofiPlayer = new LofiMusicSynthesizer();
+
+    // Trigger music load via Enter World
+    enterWorldBtn.addEventListener('click', () => {
+      introScreen.style.opacity = '0';
+      introScreen.style.pointerEvents = 'none'; // Ensure clicks pass through immediately
+      setTimeout(() => {
+        introScreen.style.display = 'none';
+        musicPlayer.start();
+        musicText.textContent = 'MUTE';
+        musicPing.classList.remove('hidden');
+      }, 1000);
+    });
+
+    musicToggleBtn.addEventListener('click', () => {
+      const isRealityActive = (realityOverlay.style.display === 'flex');
+
+      if (isRealityActive) {
+        if (lofiPlayer.isPlaying) {
+          lofiPlayer.stop();
+          musicText.textContent = 'PLAY';
+          musicPing.classList.add('hidden');
+        } else {
+          lofiPlayer.start();
+          musicText.textContent = 'MUTE';
+          musicPing.classList.remove('hidden');
+        }
+      } else {
+        if (musicPlayer.isPlaying) {
+          musicPlayer.stop();
+          musicText.textContent = 'PLAY';
+          musicPing.classList.add('hidden');
+        } else {
+          musicPlayer.start();
+          musicText.textContent = 'MUTE';
+          musicPing.classList.remove('hidden');
+        }
+      }
+    });
+
+    // -------------------------------------------------------------------------
+    // PORTAL INTERACTION MODALS CONTROL
+    // -------------------------------------------------------------------------
+    function openCelebrationModal() {
+      celebrationModal.style.display = 'flex';
+      setTimeout(() => {
+        celebrationModal.classList.remove('opacity-0', 'pointer-events-none');
+        celebrationModal.classList.add('opacity-100');
+        celebrationModal.querySelector('.glass-card-magical').style.transform = 'scale(1)';
+      }, 50);
+
+      const container = document.getElementById('modalFireflyContainer');
+      container.innerHTML = '';
+      for (let i = 0; i < 15; i++) {
+        const fly = document.createElement('div');
+        fly.className = 'modal-firefly';
+        fly.style.left = `${Math.random() * 100}%`;
+        fly.style.top = `${Math.random() * 100}%`;
+        fly.style.animationDelay = `${Math.random() * 5}s`;
+        fly.style.animationDuration = `${4 + Math.random() * 4}s`;
+        container.appendChild(fly);
+      }
+    }
+
+    function closeCelebrationModal() {
+      celebrationModal.classList.add('opacity-0', 'pointer-events-none');
+      celebrationModal.classList.remove('opacity-100');
+      celebrationModal.querySelector('.glass-card-magical').style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        celebrationModal.style.display = 'none';
+      }, 500);
+    }
+
+    closeModalBtn.addEventListener('click', closeCelebrationModal);
+    viewBoardBtn.addEventListener('click', closeCelebrationModal);
+
+    // Open Secret Portal Modal
+    secretPortalBtn.addEventListener('click', () => {
+      closeCelebrationModal();
+      setTimeout(() => {
+        secretPortalModal.style.display = 'flex';
+        setTimeout(() => {
+          secretPortalModal.classList.remove('opacity-0', 'pointer-events-none');
+          secretPortalModal.classList.add('opacity-100');
+          secretPortalModal.querySelector('.glass-card-magical').style.transform = 'scale(1)';
+        }, 50);
+      }, 400);
+    });
+
+    function closeSecretPortalModal() {
+      secretPortalModal.classList.add('opacity-0', 'pointer-events-none');
+      secretPortalModal.classList.remove('opacity-100');
+      secretPortalModal.querySelector('.glass-card-magical').style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        secretPortalModal.style.display = 'none';
+      }, 500);
+    }
+
+    closePortalModalBtn.addEventListener('click', closeSecretPortalModal);
+    dismissPortalModalBtn.addEventListener('click', closeSecretPortalModal);
+
+    // -------------------------------------------------------------------------
+    // REALITY EXIT PORTAL TRANSITION
+    // -------------------------------------------------------------------------
+    exitWorldBtn.addEventListener('click', () => {
+      let playSound = musicPlayer.isPlaying;
+
+      if (musicPlayer.isPlaying) {
+        musicPlayer.stop();
+      }
+
+      realityOverlay.style.display = 'flex';
+      setTimeout(() => {
+        realityOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        realityOverlay.classList.add('opacity-100');
+        
+        if (playSound) {
+          lofiPlayer.start();
+          musicText.textContent = 'MUTE';
+          musicPing.classList.remove('hidden');
+        } else {
+          musicText.textContent = 'PLAY';
+          musicPing.classList.add('hidden');
+        }
+      }, 50);
+    });
+
+    returnStarsBtn.addEventListener('click', () => {
+      let playSound = lofiPlayer.isPlaying;
+
+      if (lofiPlayer.isPlaying) {
+        lofiPlayer.stop();
+      }
+
+      realityOverlay.classList.add('opacity-0', 'pointer-events-none');
+      realityOverlay.classList.remove('opacity-100');
+      setTimeout(() => {
+        realityOverlay.style.display = 'none';
+        
+        if (playSound) {
+          musicPlayer.start();
+          musicText.textContent = 'MUTE';
+          musicPing.classList.remove('hidden');
+        } else {
+          musicText.textContent = 'PLAY';
+          musicPing.classList.add('hidden');
+        }
+      }, 1000);
+    });
+
+    // -------------------------------------------------------------------------
+    // ADMIN SYSTEM IMPLEMENTATION
+    // -------------------------------------------------------------------------
+    adminBtn.addEventListener('click', () => {
+      if (isAdminActive) {
+        isAdminActive = false;
+        adminBtn.classList.remove('text-amber-300', 'border-amber-400', 'shadow-[0_0_20px_rgba(251,191,36,0.3)]');
+        adminBtn.classList.add('text-amber-400');
+        showToast("Admin Mode Deactivated");
+
+        // Lock form back up and hide dynamic editors
+        adminEditContentWrapper.classList.remove('flex');
+        adminEditContentWrapper.classList.add('hidden');
+        checkLockState();
+        
+        if (localBackupMode) {
+          renderWishesLocally();
+        } else {
+          listenToWishesRealtime();
+        }
+      } else {
+        openAdminLoginModal();
+      }
+    });
+
+    function openAdminLoginModal() {
+      adminUser.value = '';
+      adminPass.value = '';
+      adminErrorMsg.classList.add('hidden');
+      adminLoginModal.style.display = 'flex';
+      setTimeout(() => {
+        adminLoginModal.classList.remove('opacity-0', 'pointer-events-none');
+        adminLoginModal.classList.add('opacity-100');
+        adminLoginModal.querySelector('.glass-card-magical').style.transform = 'scale(1)';
+      }, 50);
+    }
+
+    function closeAdminLoginModal() {
+      adminLoginModal.classList.add('opacity-0', 'pointer-events-none');
+      adminLoginModal.classList.remove('opacity-100');
+      adminLoginModal.querySelector('.glass-card-magical').style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        adminLoginModal.style.display = 'none';
+      }, 500);
+    }
+
+    cancelAdminBtn.addEventListener('click', closeAdminLoginModal);
+
+    loginAdminBtn.addEventListener('click', async () => {
+      const user = adminUser.value.trim();
+      const pass = adminPass.value.trim();
+
+      const ADMIN_USER = 'user22';
+      const ADMIN_PASS_HASH = '05a2a7c612603622a073f29f39ed7c930bedae8177bd4cc1e4ae4e47ec4d6e55';
+
+      async function hashString(str) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      const passHash = await hashString(pass);
+      const isValid = user === ADMIN_USER && passHash === ADMIN_PASS_HASH;
+
+      if (isValid) {
+        isAdminActive = true;
+        closeAdminLoginModal();
+        showToast("Admin Mode Activated - Gateway Unlocked!");
+        
+        adminBtn.classList.add('text-amber-300', 'border-amber-400', 'shadow-[0_0_20px_rgba(251,191,36,0.3)]');
+
+        // Unlock the Form & Edit Content ONLY for Admin
+        adminEditContentWrapper.classList.remove('hidden');
+        adminEditContentWrapper.classList.add('flex');
+        checkLockState();
+
+        if (localBackupMode) {
+          renderWishesLocally();
+        } else {
+          listenToWishesRealtime();
+        }
+      } else {
+        adminErrorMsg.classList.remove('hidden');
+      }
+    });
+
+    // Confirm Delete Dialog Actions
+    function openConfirmDeleteModal() {
+      confirmDeleteModal.style.display = 'flex';
+      setTimeout(() => {
+        confirmDeleteModal.classList.remove('opacity-0', 'pointer-events-none');
+        confirmDeleteModal.classList.add('opacity-100');
+        confirmDeleteModal.querySelector('.glass-card-magical').style.transform = 'scale(1)';
+      }, 50);
+    }
+
+    function closeConfirmDeleteModal() {
+      confirmDeleteModal.classList.add('opacity-0', 'pointer-events-none');
+      confirmDeleteModal.classList.remove('opacity-100');
+      confirmDeleteModal.querySelector('.glass-card-magical').style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        confirmDeleteModal.style.display = 'none';
+        deleteTargetId = null;
+      }, 300);
+    }
+
+    cancelDeleteBtn.addEventListener('click', closeConfirmDeleteModal);
+
+    confirmDeleteBtn.addEventListener('click', async () => {
+      if (!deleteTargetId) return;
+
+      try {
+        if (localBackupMode) {
+          localWishes = localWishes.filter(w => w.id !== deleteTargetId);
+          localStorage.setItem('adit_wishbook_local_data', JSON.stringify(localWishes));
+          showToast("Wish Erased Successfully");
+          closeConfirmDeleteModal();
+          renderWishesLocally();
+        } else {
+          // SECURE FIXED DELETION PATH
+          const wishDocRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'wishes', deleteTargetId);
+          await deleteDoc(wishDocRef);
+          showToast("Wish Erased Successfully");
+          closeConfirmDeleteModal();
+        }
+      } catch (err) {
+        console.error("Deletion failed:", err);
+        showToast("Cosmic spell deletion failed", "error");
+        closeConfirmDeleteModal();
+      }
+    });
+
+    // Lightbox triggers
+    const lightboxModal = document.getElementById('lightboxModal');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxTitle = document.getElementById('lightboxTitle');
+    const lightboxDesc = document.getElementById('lightboxDesc');
+    const closeLightboxBtn = document.getElementById('closeLightboxBtn');
+
+    function closeLightbox() {
+      lightboxModal.classList.add('opacity-0', 'pointer-events-none');
+      lightboxModal.classList.remove('opacity-100');
+      lightboxModal.querySelector('.glass-card-magical').style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        lightboxModal.style.display = 'none';
+      }, 500);
+    }
+
+    closeLightboxBtn.addEventListener('click', closeLightbox);
+    lightboxModal.addEventListener('click', (e) => {
+      if (e.target === lightboxModal) {
+        closeLightbox();
+      }
+    });
+  </script>
+
+  <script>
+    // -------------------------------------------------------------------------
+    // CANVAS CELESTIAL TWINKLING STAR ANIMATOR
+    // -------------------------------------------------------------------------
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initializeStars();
+    }
+
+    class TwinkleStar {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 1.5;
+        this.baseOpacity = Math.random() * 0.7 + 0.2;
+        this.opacity = this.baseOpacity;
+        this.twinkleFactor = Math.random() * 0.02 + 0.005;
+        this.angle = Math.random() * Math.PI;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(248, 250, 252, ${this.opacity})`;
+        ctx.fill();
+      }
+      update() {
+        this.angle += this.twinkleFactor;
+        this.opacity = this.baseOpacity + Math.sin(this.angle) * 0.2;
+      }
+    }
+
+    function initializeStars() {
+      stars = [];
+      const density = Math.floor((canvas.width * canvas.height) / 7500);
+      for (let i = 0; i < density; i++) {
+        stars.push(new TwinkleStar());
+      }
+    }
+
+    function animateStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.update();
+        s.draw();
+      });
+      requestAnimationFrame(animateStars);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animateStars();
+
+    // -------------------------------------------------------------------------
+    // REAL-TIME CELESTIAL COUNTDOWN LOGIC (Towards 19 July 2026)
+    // -------------------------------------------------------------------------
+    function startCelestialCountdown() {
+      const targetDate = new Date("July 19, 2026 00:00:00").getTime();
+      const dVal = document.getElementById('days');
+      const hVal = document.getElementById('hours');
+      const mVal = document.getElementById('minutes');
+      const sVal = document.getElementById('seconds');
+
+      function updateTimer() {
+        const now = new Date().getTime();
+        const diff = targetDate - now;
+
+        if (typeof window.checkLockState === 'function') {
+          window.checkLockState();
+        }
+
+        if (diff <= 0) {
+          dVal.textContent = "00";
+          hVal.textContent = "00";
+          mVal.textContent = "00";
+          sVal.textContent = "00";
+          return;
+        }
+
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+        dVal.textContent = String(d).padStart(2, '0');
+        hVal.textContent = String(h).padStart(2, '0');
+        mVal.textContent = String(m).padStart(2, '0');
+        sVal.textContent = String(s).padStart(2, '0');
+      }
+
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    }
+    startCelestialCountdown();
+
+    // ===== RESILIENT EVENT-DELEGATED CUSTOM CURSOR SYSTEM =====
+    const cursor = document.getElementById("cursor");
+    const trail = document.getElementById("cursor-trail");
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let trailX = window.innerWidth / 2;
+    let trailY = window.innerHeight / 2;
+    let initialMove = false;
+
+    if (window.matchMedia("(pointer: fine)").matches) {
+      document.addEventListener("mousemove", e => {
+        if (!initialMove) {
+          initialMove = true;
+          cursor.style.opacity = "1";
+          trail.style.opacity = "1";
+        }
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      document.addEventListener("mouseleave", () => {
+        cursor.style.opacity = "0";
+        trail.style.opacity = "0";
+      });
+
+      document.addEventListener("mouseenter", () => {
+        if (initialMove) {
+          cursor.style.opacity = "1";
+          trail.style.opacity = "1";
+        }
+      });
+
+      function animateCursorSystem() {
+        cursor.style.left = mouseX + "px";
+        cursor.style.top = mouseY + "px";
+
+        trailX += (mouseX - trailX) * 0.14;
+        trailY += (mouseY - trailY) * 0.14;
+
+        trail.style.left = trailX + "px";
+        trail.style.top = trailY + "px";
+
+        requestAnimationFrame(animateCursorSystem);
+      }
+      animateCursorSystem();
+
+      document.addEventListener("mouseover", (e) => {
+        if (e.target.closest("button, input, textarea, a, [role='button'], .gallery-item")) {
+          cursor.style.transform = "translate(-50%, -50%) scale(1.6)";
+          cursor.style.background = "#ffffff";
+          trail.style.transform = "translate(-50%, -50%) scale(0.65)";
+          trail.style.borderColor = "#FBBF24";
+          trail.style.borderWidth = "2px";
+        }
+      });
+
+      document.addEventListener("mouseout", (e) => {
+        if (e.target.closest("button, input, textarea, a, [role='button'], .gallery-item")) {
+          cursor.style.transform = "translate(-50%, -50%) scale(1)";
+          cursor.style.background = "#FBBF24";
+          trail.style.transform = "translate(-50%, -50%) scale(1)";
+          trail.style.borderColor = "rgba(196, 181, 253, 0.5)";
+          trail.style.borderWidth = "1px";
+        }
+      });
+    } else {
+      cursor.style.display = "none";
+      trail.style.display = "none";
+    }
+  </script>
 </body>
 </html>
