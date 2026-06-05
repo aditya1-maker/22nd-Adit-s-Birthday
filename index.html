@@ -151,6 +151,14 @@
       pointer-events: none;
       animation: modalFireflies 6s infinite ease-in-out;
     }
+    /* Custom scrollbar for greeting card */
+#greetingCard ::-webkit-scrollbar {
+  display: none;
+}
+#greetingCard .glass-magical {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
   </style>
 </head>
 <body class="relative text-slate-100 selection:bg-purple-800 selection:text-amber-200">
@@ -170,15 +178,26 @@
         Adit's 22nd<br>
         <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-purple-300 to-amber-400">Enchanted</span> Wishbook
       </h1>
-      
+  <!-- Name Input Form -->
+<div id="nameInputWrapper" class="w-full max-w-xs mb-6 flex flex-col items-center gap-3">
+  <input 
+    id="visitorNameInput"
+    type="text" 
+    placeholder="Your name, dear star..."
+    maxlength="40"
+    class="w-full text-center px-5 py-3 rounded-full bg-slate-950/60 border border-amber-400/30 focus:outline-none focus:border-amber-400 text-amber-100 text-sm placeholder-purple-300/50 backdrop-blur-sm tracking-widest font-magic-title transition-all"
+  >
+  <p id="nameError" class="hidden text-rose-400 text-xs tracking-widest font-magic-title">✦ Please enter your name first ✦</p>
+</div>
+<!-- GREETING CARD OVERLAY -->
+
       <button 
         id="enterWorldBtn"
         class="group relative px-10 py-4 overflow-hidden rounded-full border border-amber-400/40 bg-transparent text-amber-300 font-semibold tracking-[0.25em] text-xs font-magic-title uppercase shadow-[0_0_20px_rgba(251,191,36,0.15)] hover:shadow-[0_0_35px_rgba(251,191,36,0.4)] active:scale-95 transition-all duration-300 cursor-pointer"
       >
         <span class="absolute inset-0 bg-gradient-to-r from-purple-900 to-indigo-900 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
-        <span class="relative z-10">ENTER THE WORLD</span>
-      </button>
-    </div>
+        <span class="relative z-10">ENTER THE WORLD</span></button>
+    </div> 
   </div>
 
   <!-- REALITY ESCAPE OVERLAY (Daytime transition) -->
@@ -221,7 +240,44 @@
       </button>
     </div>
   </div>
+<div id="greetingCard" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md" style="display:none;">
+  <div class="glass-magical rounded-3xl max-w-lg w-full p-8 relative overflow-y-auto max-h-[90vh]">
+    <div class="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-400 to-transparent rounded-t-3xl"></div>
+    
+    <div class="text-center mb-6">
+      <p class="text-amber-400 text-lg mb-2">✨</p>
+      <p class="text-slate-200 text-sm leading-relaxed font-garamond">
+        Hi, <span id="greetingName" class="text-amber-300 font-semibold-italic"></span>.
+        I'm truly happy that you've found your way to these enchanted pages. Before you begin your journey, allow this guide to illuminate the path ahead.
+      </p>
+    </div>
 
+    <div class="space-y-4 text-sm text-slate-300 font-garamond leading-relaxed">
+      <div class="flex gap-3">
+        <span class="text-amber-400 font-magic-title font-bold shrink-0">✦</span>
+        <div><span class="text-amber-300 font-semibold">Step One — Open the Constellation</span><br>Begin by uncovering the stars that shaped Adit's journey. Within them lie cherished childhood memories and a letter from the past, written by Adit for the person he would become at twenty-two.</div>
+      </div>
+      <div class="flex gap-3">
+        <span class="text-amber-400 font-magic-title font-bold shrink-0">✦</span>
+        <div><span class="text-amber-300 font-semibold">Step Two — Gather a Wish</span><br>Pause for a moment and weave together your hopes, prayers, and kind thoughts for Adit. Every wish carries a little magic of its own, and every word will become a treasured light along his path.</div>
+      </div>
+      <div class="flex gap-3">
+        <span class="text-amber-400 font-magic-title font-bold shrink-0">✦</span>
+        <div><span class="text-amber-300 font-semibold">Step Three — Cast Your Wish Spell</span><br>When your wishes are ready, enter the Wish Spell chamber and inscribe your name alongside your message. Once written, your wish shall join the constellation of countless others.</div>
+      </div>
+      <div class="flex gap-3">
+        <span class="text-amber-400 font-magic-title font-bold shrink-0">✦</span>
+        <div><span class="text-amber-300 font-semibold">Step Four — Unlock the Secret Portal</span><br>With your spell cast and your place among the stars secured, venture onward to the Secret Portal, where a hidden surprise awaits those who continue the journey.</div>
+      </div>
+    </div>
+
+    <p class="text-center text-slate-400 text-xs mt-6 font-sans-inter">May your visit be filled with wonder, and may the stars guide your way. ✨🌙</p>
+
+    <button id="openWorldBtn" class="mt-6 w-full py-3.5 bg-gradient-to-r from-purple-950 to-indigo-950 hover:from-purple-900 hover:to-indigo-900 border border-amber-400/30 hover:border-amber-400 text-amber-300 font-bold text-xs font-magic-title tracking-[0.2em] uppercase rounded-xl transition-all shadow-md active:scale-95 cursor-pointer">
+      ✦ Open the World ✦
+    </button>
+  </div>
+</div>
   <!-- CUSTOM CURSOR ELEMENTS -->
   <div id="cursor" class="hidden md:block"></div>
   <div id="cursor-trail" class="hidden md:block"></div>
@@ -303,7 +359,7 @@
     <!-- HEADER INTRO HERO SECTION -->
     <header class="text-center mb-16 max-w-3xl flex flex-col items-center">
       <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-950/50 border border-purple-500/30 shadow-[0_0_15px_rgba(139,92,246,0.2)] text-[11px] font-bold text-amber-300 uppercase tracking-[0.3em] mb-6 font-magic-title" mt-10">
-      
+        
         ✦ The 22nd Celestial Alignment ✦
       </div>
       
@@ -1726,18 +1782,39 @@ musicPlayer.isPlaying = false;
 musicPlayer.addEventListener('play', () => musicPlayer.isPlaying = true);
 musicPlayer.addEventListener('pause', () => musicPlayer.isPlaying = false);
     const lofiPlayer = new LofiMusicSynthesizer();
+    // Greeting Card — Open World button
+const openWorldBtn = document.getElementById('openWorldBtn');
+openWorldBtn.addEventListener('click', () => {
+  document.getElementById('greetingCard').style.display = 'none';
+  musicPlayer.start();
+  musicText.textContent = 'MUTE';
+  musicPing.classList.remove('hidden');
+});
 
     // Trigger music load via Enter World
     enterWorldBtn.addEventListener('click', () => {
-      introScreen.style.opacity = '0';
-      introScreen.style.pointerEvents = 'none'; // Ensure clicks pass through immediately
-      setTimeout(() => {
-        introScreen.style.display = 'none';
-        musicPlayer.start();
-        musicText.textContent = 'MUTE';
-        musicPing.classList.remove('hidden');
-      }, 1000);
-    });
+  const nameInput = document.getElementById('visitorNameInput');
+  const nameError = document.getElementById('nameError');
+  const name = nameInput.value.trim();
+  if (!name) {
+    nameError.classList.remove('hidden');
+    nameInput.classList.add('border-rose-400/60');
+    return;
+  }
+  nameError.classList.add('hidden');
+  localStorage.setItem('visitorName', name);
+  introScreen.style.opacity = '0';
+  introScreen.style.pointerEvents = 'none';
+ setTimeout(() => {
+  introScreen.style.display = 'none';
+  localStorage.setItem('hasEnteredWorld', 'true');
+  // Tampilkan greeting card
+  const greetingCard = document.getElementById('greetingCard');
+  const greetingName = document.getElementById('greetingName');
+  greetingName.textContent = name;
+  greetingCard.style.display = 'flex';
+}, 1000);
+});
 
     musicToggleBtn.addEventListener('click', () => {
       const isRealityActive = (realityOverlay.style.display === 'flex');
